@@ -1,3 +1,12 @@
+# Antlr build files
+apppal/logic/grammar/AppPALBaseListener.java
+apppal/logic/grammar/AppPALBaseVisitor.java
+apppal/logic/grammar/AppPALLexer.java
+apppal/logic/grammar/AppPALListener.java
+apppal/logic/grammar/AppPALParser.java
+apppal/logic/grammar/AppPALVisitor.java
+
+
 ### https://raw.github.com/github/gitignore/4a9d41f8947b9fe5850914abb7e59a59e1ae2cb6/java.gitignore
 
 *.class
