@@ -1,3 +1,6 @@
+# Tags
+tags
+
 # Antlr build files
 apppal/logic/grammar/AppPALBaseListener.java
 apppal/logic/grammar/AppPALBaseVisitor.java

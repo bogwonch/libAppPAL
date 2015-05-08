@@ -37,5 +37,5 @@ $(TARGET_JAR): classes $(MANIFEST)
 	jar cfm $(@) $(MANIFEST) apppal lib
 
 clean:
-	$(RM) $(shell find -name \*.class) $(PARSER_SRC)
+	$(RM) $(shell find -name \*.class) $(PARSER_SRC) $(TARGET_JAR)
 
