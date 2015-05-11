@@ -2,11 +2,14 @@ package apppal.application;
 
 import apppal.logic.evaluation.AC;
 import apppal.logic.evaluation.Evaluation;
+import apppal.logic.evaluation.Result;
 import apppal.logic.language.Assertion;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -64,7 +67,8 @@ public class PPC
       }
     }
     catch (Exception e)
-    { System.err.println("Missing argument for '"+args[i-1]+"'");
+    { System.err.println("\nMissing argument for '"+args[i-1]+"'");
+      e.printStackTrace();
       System.exit(2);
     }
 
@@ -104,13 +108,32 @@ public class PPC
 
   private void repl() 
   {
-    try {
-    String query = "\"AppPAL\" says \"AppPAL\" isCool."; 
-    Assertion a = Assertion.parse(query);
-    this.out.println("?- "+a.toString());
+    final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    for (;;)
+    { try 
+      { 
+        System.out.print("?- ");
+
+        final String line;
+        try { line = br.readLine(); }
+        catch (NullPointerException e) { return; }
+
+        if (line.isEmpty()) continue;
+        if (line == null) return;
+      
+        final Assertion query = Assertion.parse(line);
+        final Result result = this.evaluation.run(query);
+        
+        this.out.println((result.isProven() ? "YES: " : "NO:  ")+line);
+
+      }
+      catch (Exception e)
+      { // Handle someone hitting C-D to quit.  God knows why we need this.
+        // I'm blaming Java.  It's a stupid language.
+        if (e.toString() == "java.lang.NullPointerException") return;
+        else System.err.println("AppPAL: error: "+e);
+      }
     }
-    catch (Exception e)
-    { System.err.println("AppPAL: error: "+e); }
   }
 
   public static void main(String[] args) throws Exception 
