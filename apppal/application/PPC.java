@@ -75,6 +75,7 @@ public class PPC
     // Build the assertion context
     for (String file : this.policy_files)
     {
+      System.err.println("[+] Loading policy file '"+file+"'");
       try
       { this.ac.merge(new AC(new FileInputStream(file))); }
       catch (IOException e)
@@ -84,8 +85,10 @@ public class PPC
     }
 
     // Build the list of queries
-    for (String file : this.policy_files)
-    { final List<Assertion> assertions;
+    for (String file : this.query_files)
+    {
+      System.err.println("[+] Loading query file '"+file+"'");
+      final List<Assertion> assertions;
       try
       { assertions = AC.parse(new FileInputStream(file));
         for (Assertion a : assertions)
@@ -103,11 +106,22 @@ public class PPC
 
   public void run()
   {
+    if (this.queries.size() > 0)
+    {
+      System.err.println("[+] Running queries");
+      for (Assertion query : this.queries)
+      {
+        final Result result = this.evaluation.run(query);
+        this.out.println((result.isProven() ? "YES: " : "NO:  ")+query);
+      }
+      System.err.println("");
+    }
     if (this.interactive) repl();
   }
 
   private void repl() 
   {
+    System.err.println("[+] Starting REPL");
     final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     for (;;)
     { try 

@@ -1,6 +1,8 @@
 package apppal.logic.language.constraint.functions;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -24,31 +26,31 @@ public class HasPermission implements ConstraintFunction
   {
     try
     {
-      String app = args.get(0).toString().replace("\"","");
-      String perm = args.get(1).toString().replace("\"","");
+      final String app = args.get(0).toString().replace("\"","");
+      final String perm = args.get(1).toString().replace("\"","");
 
-      URL url = new URL("http://localhost:8000/has" +
-        "?app="+app.toString()+
-        "&permission="+perm.toString());
+      // Check we are dealing with an app
+      if (! app.startsWith("apk://")) return new Fail();
 
-      URLConnection conn = url.openConnection();
+      // Path to app permissions
+      final File permissions = new File("Apps/"+app.replace("^apk://", "")+".permissions");
 
-      BufferedReader in = new BufferedReader(
-        new InputStreamReader(conn.getInputStream()));
+      // Normally if the file doesn't exist we'll want to extract the
+      // permissions... in this case we don't care as we'll have them all
+      if (! permissions.exists()) return new Fail();
 
-
-      String response;
-      while ((response = in.readLine()) != null)
-      {
-        System.err.println("[!] '" + response + "'");
-        if (response.equals("YES")) return new Bool(true);
-        if (response.equals("NO")) return new Bool(false);
+      final BufferedReader in = new BufferedReader(new FileReader(permissions));
+      String line;
+      while ((line = in.readLine()) != null)
+      { if (line.contains(perm)) 
+        { in.close();
+          return new Bool(true);  
+        }
       }
-      return new Fail();
+      in.close();
+      return new Bool(false);
     }
     catch (Exception e)
-    {
-      return new Fail();
-    }
+    { return new Fail(); }
   }
 }
