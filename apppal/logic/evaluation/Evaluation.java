@@ -7,7 +7,10 @@ import apppal.logic.language.Assertion;
 import apppal.logic.language.CanSay;
 import apppal.logic.language.Constant;
 import apppal.logic.language.D;
+import apppal.logic.language.E;
 import apppal.logic.language.Fact;
+import apppal.logic.language.Predicate;
+import apppal.logic.language.VP;
 import apppal.logic.language.Variable;
 
 /**
@@ -75,8 +78,22 @@ public class Evaluation
 
   private Proof cond(Assertion q, D d)
   {
+    // Check implicit facts
+    // isAnApp
+    final E subject = q.says.consequent.subject;
+    final VP vp = q.says.consequent.object;
+    if (vp instanceof Predicate)
+    {
+      if (((Predicate) vp).name.equals("isAnApp"))
+      {
+        if (subject instanceof Constant)
+         return new Proof(subject.name.startsWith("apk://"));
+      }
+    }
+
     for (final Assertion a : this.ac.assertions)
     {
+      /* System.err.println("[?] Cond: "+a+ "{"); */
       final Unification headU = q.unify(a.consequence());
       if (headU.hasFailed()) continue;
 
@@ -91,9 +108,11 @@ public class Evaluation
       if (! this.checkAntecedents(thetaA, d).isKnown())
         continue;
 
+      /* System.err.println("} YES"); */
       return new Proof(true);
     }
 
+    /* System.err.println("} NO\n"); */
     return new Proof(false);
   }
 
@@ -131,6 +150,7 @@ public class Evaluation
     return new Proof(false);
   }
 
+  /*
   private Proof canSay(Assertion q, D d)
   {
     // Disallow this rule when delegation banned
@@ -158,7 +178,9 @@ public class Evaluation
 
     return new Proof(false);
   }
+  */
 
+  /*
   private Proof canActAs(Assertion q, D d)
   {
     for (final Constant c : this.ac.constants)
@@ -178,16 +200,18 @@ public class Evaluation
 
     return new Proof(false);
   }
+  */
 
   private Proof canSayOrCanActAs(Assertion q, D d)
   {
-    for (final Constant c : this.ac.interesting)
+    for (final Constant c : this.ac.subjects)
     {
       // Can Act As
-      if (this.ac.subjects.contains(c))
-      {
+      /* if (this.ac.interesting.contains(c)) // True by definition of interesting surely? TODO Figure out wtf? */
+      /* { */
         if (! q.says.consequent.subject.equals(c)) // Don't care about A can-act-as A: Tautological
         {
+          /* System.err.println("[?] CanActAs: "+q+" {"); */
           final Assertion renaming =
             Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
           final Result rRenaming = evaluate(renaming, d);
@@ -196,18 +220,24 @@ public class Evaluation
             final Assertion renamed =
               Assertion.make(q.speaker, c, q.says.consequent.object);
             final Result rRenamed = evaluate(renamed, d);
-            if (!rRenamed.isProven()) continue;
+            if (!rRenamed.isProven()) { 
+              /* System.err.println("} NO"); */
+              continue;
+            }
 
+            /* System.err.println("} YES"); */
             return new Proof(true);
           }
+          /* System.err.println("} NO"); */
         }
-      }
+      /* } */
 
       // Can-say
       if (this.ac.voiced.contains(c))
       {
         if (! q.speaker.equals(c)) // Don't care about A says A can-say...: Tautological
         {
+          /* System.err.println("[?] CanSay: "+q); */
           // Disallow this rule when delegation banned
           if (d == D.ZERO) return new Proof(false);
 
@@ -224,10 +254,14 @@ public class Evaluation
               final Assertion delegation = Assertion.make(c, q.says.consequent);
               final Result rDelegation = evaluate(delegation, depth);
               if (rDelegation.isProven())
+              {
+                /* System.err.println("} YES"); */
                 return new Proof(true);
+              }
             }
           }
         }
+        /* System.err.println("} NO"); */
       }
     }
 

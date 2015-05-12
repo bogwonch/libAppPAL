@@ -17,6 +17,7 @@ import apppal.logic.grammar.AppPALLexer;
 import apppal.logic.grammar.AppPALParser;
 import apppal.logic.language.Assertion;
 import apppal.logic.language.Constant;
+import apppal.logic.language.E;
 
 /**
  * An assertion context is the result of loading a policy file into AppPAL.
@@ -56,6 +57,10 @@ public class AC
     }
     this.interesting.addAll(this.voiced);
     this.interesting.addAll(this.subjects);
+
+    /* System.err.println("VOICED:"); for (E e : this.voiced) { System.err.println("  "+e); } */
+    /* System.err.println("SUBJECTS:"); for (E e : this.subjects) { System.err.println("  "+e); } */
+    /* System.err.println("INTERESTING:"); for (E e : this.interesting) { System.err.println("  "+e); } */
   }
 
   /**

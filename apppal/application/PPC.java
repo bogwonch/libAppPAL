@@ -12,12 +12,15 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class PPC
 {
   private List<String> query_files;
   private List<String> policy_files;
-  private List<Assertion> queries;
+  private Set<Assertion> queries;
   private final Evaluation evaluation;
   private final AC ac;
   private PrintStream out;
@@ -27,7 +30,7 @@ public class PPC
   {
     this.policy_files = new LinkedList<String>();
     this.query_files = new LinkedList<String>();
-    this.queries = new LinkedList<Assertion>();
+    this.queries = new HashSet<Assertion>();
     this.ac = new AC();
     this.interactive = false;
     this.out = System.out;
@@ -111,13 +114,24 @@ public class PPC
       System.err.println("[+] Running queries");
       for (Assertion query : this.queries)
       {
-        final Result result = this.evaluation.run(query);
+        final Evaluation e = new Evaluation(this.ac);
+        final Result result = e.run(query);
         this.out.println((result.isProven() ? "YES: " : "NO:  ")+query);
       }
-      System.err.println("");
     }
+
     if (this.interactive) repl();
   }
+
+  private void runQuery(Assertion query)
+  {
+    final Evaluation e = new Evaluation(this.ac);
+    final Result result = e.run(query);
+
+    final String str = (result.isProven() ? "YES: " : "NO:  ")+query; 
+    synchronized (this.out) { this.out.println(str); }
+  }
+
 
   private void repl() 
   {
