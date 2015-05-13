@@ -26,28 +26,42 @@ public class HasPermission implements ConstraintFunction
   {
     try
     {
+      /* System.err.println("[?] Evaluating 'hasPermission'"); */
       final String app = args.get(0).toString().replace("\"","");
       final String perm = args.get(1).toString().replace("\"","");
+      /* System.err.println("[?]   arg[0]: "+app); */
+      /* System.err.println("[?]   arg[1]: "+perm); */
 
       // Check we are dealing with an app
-      if (! app.startsWith("apk://")) return new Fail();
+      if (! app.startsWith("apk://")) 
+      {
+        /* System.err.println("[?]   not an app! Failing."); */
+        return new Fail();
+      }
 
       // Path to app permissions
-      final File permissions = new File("Apps/"+app.replace("^apk://", "")+".permissions");
+      final File permissions = new File("Apps/"+app.replace("apk://", "")+".permissions");
+      /* System.err.println("[?] reading '"+permissions+"'"); */
 
       // Normally if the file doesn't exist we'll want to extract the
       // permissions... in this case we don't care as we'll have them all
-      if (! permissions.exists()) return new Fail();
+      if (! permissions.exists())
+      {
+        /* System.err.println("[?]   permissions file doesn't exist!  Failing."); */
+        return new Fail();
+      }
 
       final BufferedReader in = new BufferedReader(new FileReader(permissions));
       String line;
       while ((line = in.readLine()) != null)
       { if (line.contains(perm)) 
         { in.close();
+          /* System.err.println("[?] ...it was true!"); */
           return new Bool(true);  
         }
       }
       in.close();
+      /* System.err.println("[?] ...it was false!"); */
       return new Bool(false);
     }
     catch (Exception e)
