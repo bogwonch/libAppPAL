@@ -1,6 +1,6 @@
 ANTLR4=java -jar tools/antlr-4.5-complete.jar
 JC=javac
-JFLAGS=-Xlint:unchecked
+JFLAGS=-Xlint:unchecked -source 1.7 -target 1.7
 CLASSPATH=lib/antlr-runtime-4.5.jar:.
 
 %.class: %.java
