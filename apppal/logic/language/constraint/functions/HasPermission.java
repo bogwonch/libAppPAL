@@ -1,5 +1,10 @@
 package apppal.logic.language.constraint.functions;
 
+import android.content.ContextWrapper;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,6 +13,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 
+import appguarden.apppal_checker.MainActivity;
+import apppal.logic.evaluation.Proof;
 import apppal.logic.interfaces.ConstraintFunction;
 import apppal.logic.language.constraint.Bool;
 import apppal.logic.language.constraint.CE;
@@ -19,7 +26,10 @@ import apppal.logic.language.constraint.Fail;
 public class HasPermission implements ConstraintFunction
 {
   @Override
-  public int arity() { return 2; }
+  public int arity()
+  {
+    return 2;
+  }
 
   @Override
   public CE eval(List<CE> args)
@@ -27,48 +37,34 @@ public class HasPermission implements ConstraintFunction
     BufferedReader in = null;
     try
     {
-      /* System.err.println("[?] Evaluating 'hasPermission'"); */
-      final String app = args.get(0).toString().replace("\"","");
-      final String perm = args.get(1).toString().replace("\"","");
-      /* System.err.println("[?]   arg[0]: "+app); */
-      /* System.err.println("[?]   arg[1]: "+perm); */
+      final String app = args.get(0).toString().replace("\"", "");
+      final String perm = args.get(1).toString().replace("\"", "");
 
       // Check we are dealing with an app
-      if (! app.startsWith("apk://"))
-      {
-        /* System.err.println("[?]   not an app! Failing."); */
+      if (!app.startsWith("apk://"))
         return new Fail();
-      }
 
-      // Path to app permissions
-      final File permissions = new File("Apps/"+app.replace("apk://", "")+".permissions");
-      /* System.err.println("[?] reading '"+permissions+"'"); */
+      final String name = app.substring(6);
 
-      // Normally if the file doesn't exist we'll want to extract the
-      // permissions... in this case we don't care as we'll have them all
-      if (! permissions.exists())
-      {
-        /* System.err.println("[?]   permissions file doesn't exist!  Failing."); */
-        return new Fail();
-      }
+      if (MainActivity.instance == null) return new Fail();
 
-      in = new BufferedReader(new FileReader(permissions));
-      String line;
-      while ((line = in.readLine()) != null)
-      { if (line.contains(perm))
-        { in.close();
-          /* System.err.println("[?] ...it was true!"); */
-          return new Bool(true);
-        }
-      }
-      in.close();
-      /* System.err.println("[?] ...it was false!"); */
+      final PackageManager pm = MainActivity.instance.getPackageManager(); // Such hack
+      final PackageInfo info = pm.getPackageInfo(name, PackageManager.GET_PERMISSIONS);
+      final String[] permissions = info.requestedPermissions;
+
+      if (permissions != null)
+        for (final String usesPermission : permissions)
+          if (usesPermission.equals(perm)) return new Bool(true);
       return new Bool(false);
     }
     catch (Exception e)
     {
-      try { if (in != null) in.close(); } catch(java.io.IOException err) {} // Already in failure code
-      
+      try
+      {
+        if (in != null) in.close();  // Already in failure code
+      }
+      catch (java.io.IOException err) {}
+
       return new Fail();
     }
   }
