@@ -49,11 +49,14 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
   public Object visitConstant(AppPALParser.ConstantContext ctx)
   {
     String s = ctx.CONSTANT().getText();
-    if (s.startsWith("\""))
+    if (s.startsWith("\"") || s.startsWith("'"))
       s = s.substring(1, s.length());
-    if (s.endsWith("\""))
+    if (s.endsWith("\"") || s.endsWith("'"))
       s = s.substring(0, s.length() - 1);
-    return new Constant(s);
+
+    final Constant result = new Constant(s);
+	System.err.println("found constant: "+result);
+	return result;
   }
 
   /**

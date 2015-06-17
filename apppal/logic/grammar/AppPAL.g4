@@ -1,7 +1,7 @@
 grammar AppPAL;
 
 VARIABLE: UPPER TOKENCHAR*;
-CONSTANT: '"' ~["]+ '"';
+CONSTANT: ['"] ~['"]+ ['"];
 e: VARIABLE #variable
  | CONSTANT #constant
  ;
