@@ -104,6 +104,10 @@ public class Function extends CE implements Unifiable<CE>
         f = new HasPermission();
         break;
 
+      case "beforeHour":
+        f = new BeforeHour();
+        break;
+
       case "failure":
         f = new Failure();
         break;
