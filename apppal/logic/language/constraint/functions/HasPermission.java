@@ -24,6 +24,7 @@ public class HasPermission implements ConstraintFunction
   @Override
   public CE eval(List<CE> args)
   {
+    BufferedReader in = null;
     try
     {
       /* System.err.println("[?] Evaluating 'hasPermission'"); */
@@ -33,7 +34,7 @@ public class HasPermission implements ConstraintFunction
       /* System.err.println("[?]   arg[1]: "+perm); */
 
       // Check we are dealing with an app
-      if (! app.startsWith("apk://")) 
+      if (! app.startsWith("apk://"))
       {
         /* System.err.println("[?]   not an app! Failing."); */
         return new Fail();
@@ -51,13 +52,13 @@ public class HasPermission implements ConstraintFunction
         return new Fail();
       }
 
-      final BufferedReader in = new BufferedReader(new FileReader(permissions));
+      in = new BufferedReader(new FileReader(permissions));
       String line;
       while ((line = in.readLine()) != null)
-      { if (line.contains(perm)) 
+      { if (line.contains(perm))
         { in.close();
           /* System.err.println("[?] ...it was true!"); */
-          return new Bool(true);  
+          return new Bool(true);
         }
       }
       in.close();
@@ -65,6 +66,10 @@ public class HasPermission implements ConstraintFunction
       return new Bool(false);
     }
     catch (Exception e)
-    { return new Fail(); }
+    {
+      try { if (in != null) in.close(); } catch(java.io.IOException err) {} // Already in failure code
+      
+      return new Fail();
+    }
   }
 }
