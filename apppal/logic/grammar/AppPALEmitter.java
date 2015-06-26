@@ -55,7 +55,6 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
       s = s.substring(0, s.length() - 1);
 
     final Constant result = new Constant(s);
-	System.err.println("found constant: "+result);
 	return result;
   }
 
