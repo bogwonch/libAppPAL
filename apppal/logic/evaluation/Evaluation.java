@@ -26,6 +26,10 @@ public class Evaluation
   {
     this.ac = ac;
     this.rt = new ResultsTable();
+
+    for (final Assertion a : this.ac.assertions)
+      if (a.isGround() && a.says.constraint.isTrue())
+        rt.add(a);
   }
 
   public static Result run(AC ac, Assertion query)
@@ -34,7 +38,9 @@ public class Evaluation
   }
 
   public Result run(final Assertion query)
-  { return this.evaluate(query, D.INF); }
+  {
+    return this.evaluate(query, D.INF);
+  }
 
   public static boolean shows(AC ac, Assertion query)
   {
@@ -42,13 +48,15 @@ public class Evaluation
   }
 
   public boolean shows(final Assertion query)
-  { return this.run(query).isProven(); }
+  {
+    return this.run(query).isProven();
+  }
 
   private Result evaluate(Assertion q, D d)
   {
-    if (this.rt.has(q,d))
+    if (this.rt.has(q, d))
     {
-      return this.rt.get(q,d);
+      return this.rt.get(q, d);
     }
 
     this.rt.markUnfinished(q, d);
@@ -87,7 +95,7 @@ public class Evaluation
       if (((Predicate) vp).name.equals("isAnApp"))
       {
         if (subject instanceof Constant)
-         return new Proof(subject.name.startsWith("apk://"));
+          return new Proof(subject.name.startsWith("apk://"));
       }
     }
 
@@ -209,27 +217,28 @@ public class Evaluation
       // Can Act As
       /* if (this.ac.interesting.contains(c)) // True by definition of interesting surely? TODO Figure out wtf? */
       /* { */
-        if (! q.says.consequent.subject.equals(c)) // Don't care about A can-act-as A: Tautological
+      if (! q.says.consequent.subject.equals(c)) // Don't care about A can-act-as A: Tautological
+      {
+        /* System.err.println("[?] CanActAs: "+q+" {"); */
+        final Assertion renaming =
+          Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
+        final Result rRenaming = evaluate(renaming, d);
+        if (rRenaming.isProven())
         {
-          /* System.err.println("[?] CanActAs: "+q+" {"); */
-          final Assertion renaming =
-            Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
-          final Result rRenaming = evaluate(renaming, d);
-          if (rRenaming.isProven())
+          final Assertion renamed =
+            Assertion.make(q.speaker, c, q.says.consequent.object);
+          final Result rRenamed = evaluate(renamed, d);
+          if (!rRenamed.isProven())
           {
-            final Assertion renamed =
-              Assertion.make(q.speaker, c, q.says.consequent.object);
-            final Result rRenamed = evaluate(renamed, d);
-            if (!rRenamed.isProven()) { 
-              /* System.err.println("} NO"); */
-              continue;
-            }
-
-            /* System.err.println("} YES"); */
-            return new Proof(true);
+            /* System.err.println("} NO"); */
+            continue;
           }
-          /* System.err.println("} NO"); */
+
+          /* System.err.println("} YES"); */
+          return new Proof(true);
         }
+        /* System.err.println("} NO"); */
+      }
       /* } */
 
       // Can-say
