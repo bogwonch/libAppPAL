@@ -13,6 +13,9 @@ import apppal.logic.language.Predicate;
 import apppal.logic.language.VP;
 import apppal.logic.language.Variable;
 
+import java.util.Set;
+import java.util.HashSet;
+
 /**
  * Class for doing the actual evaluation
  */
@@ -21,15 +24,25 @@ public class Evaluation
   public final AC ac;
   private Assertion q;
   private ResultsTable rt;
+  private Set<String> derivable;
 
   public Evaluation(AC ac)
   {
     this.ac = ac;
     this.rt = new ResultsTable();
+    this.derivable = new HashSet<>();
+    this.derivable.add("isAnApp");
 
     for (final Assertion a : this.ac.assertions)
+    {
       if (a.isGround() && a.says.constraint.isTrue())
         rt.add(a);
+      else if (! a.isGround() &&
+               a.says.consequent.object instanceof Predicate)
+      {
+        this.derivable.add(((Predicate) a.says.consequent.object).name);
+      }
+    }
   }
 
   public static Result run(AC ac, Assertion query)
@@ -59,6 +72,13 @@ public class Evaluation
       return this.rt.get(q, d);
     }
 
+    // If we're never going to be able to derive this don't even bother.
+    if (q.says.consequent.object instanceof Predicate &&
+        ! this.derivable.contains(((Predicate) q.says.consequent.object).name))
+    {
+      return new Result(q, d, new Proof(false));
+    }
+
     this.rt.markUnfinished(q, d);
 
     // TODO: refactor this bollox
@@ -77,7 +97,6 @@ public class Evaluation
       this.rt.update(result);
       return result;
     }
-
 
     Result result = new Result(q, d, new Proof(false));
     this.rt.update(result);
@@ -159,56 +178,56 @@ public class Evaluation
   }
 
   /*
-  private Proof canSay(Assertion q, D d)
+     private Proof canSay(Assertion q, D d)
+     {
+  // Disallow this rule when delegation banned
+  if (d == D.ZERO) return new Proof(false);
+
+  // Disallow nested can-say statements
+  if (q.says.consequent.object instanceof CanSay) return new Proof(false);
+
+  for (final Constant c : this.ac.voiced)
   {
-    // Disallow this rule when delegation banned
-    if (d == D.ZERO) return new Proof(false);
-
-    // Disallow nested can-say statements
-    if (q.says.consequent.object instanceof CanSay) return new Proof(false);
-
-    for (final Constant c : this.ac.voiced)
-    {
-      for(final D depth : EnumSet.of(D.ZERO, D.INF))
-      {
-        final Assertion delegator =
-          Assertion.makeCanSay(q.speaker, c, depth, q.says.consequent);
-        final Result rDelegator = evaluate(delegator, d);
-        if (rDelegator.isProven())
-        {
-          final Assertion delegation = Assertion.make(c, q.says.consequent);
-          final Result rDelegation = evaluate(delegation, depth);
-          if (rDelegation.isProven())
-            return new Proof(true);
-        }
-      }
-    }
-
-    return new Proof(false);
+  for(final D depth : EnumSet.of(D.ZERO, D.INF))
+  {
+  final Assertion delegator =
+  Assertion.makeCanSay(q.speaker, c, depth, q.says.consequent);
+  final Result rDelegator = evaluate(delegator, d);
+  if (rDelegator.isProven())
+  {
+  final Assertion delegation = Assertion.make(c, q.says.consequent);
+  final Result rDelegation = evaluate(delegation, depth);
+  if (rDelegation.isProven())
+  return new Proof(true);
   }
-  */
+  }
+  }
+
+  return new Proof(false);
+     }
+     */
 
   /*
-  private Proof canActAs(Assertion q, D d)
-  {
-    for (final Constant c : this.ac.constants)
-    {
-      final Assertion renaming =
-        Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
-      final Result rRenaming = evaluate(renaming, d);
-      if (! rRenaming.isProven()) continue;
+     private Proof canActAs(Assertion q, D d)
+     {
+     for (final Constant c : this.ac.constants)
+     {
+     final Assertion renaming =
+     Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
+     final Result rRenaming = evaluate(renaming, d);
+     if (! rRenaming.isProven()) continue;
 
-      final Assertion renamed =
-        Assertion.make(q.speaker, c, q.says.consequent.object);
-      final Result rRenamed = evaluate(renamed, d);
-      if (! rRenamed.isProven()) continue;
+     final Assertion renamed =
+     Assertion.make(q.speaker, c, q.says.consequent.object);
+     final Result rRenamed = evaluate(renamed, d);
+     if (! rRenamed.isProven()) continue;
 
-      return new Proof(true);
-    }
+     return new Proof(true);
+     }
 
-    return new Proof(false);
-  }
-  */
+     return new Proof(false);
+     }
+     */
 
   private Proof canSayOrCanActAs(Assertion q, D d)
   {
