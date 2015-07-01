@@ -31,7 +31,9 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
   private static int number = 0;
 
   public Assertion(E speaker, Claim says)
-  { this(speaker, says, ++Assertion.number); }
+  {
+    this(speaker, says, ++Assertion.number);
+  }
 
   public Assertion(E speaker, Claim says, int scope)
   {
@@ -41,6 +43,11 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
     this.scope(scope);
     for (Fact f : this.says.antecedents)
       f.implicitSpeaker = speaker;
+  }
+
+  public boolean isGround()
+  {
+    return this.vars().size() == 0;
   }
 
   public Set<Variable> vars()
@@ -95,7 +102,10 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
     if (this.says.consequent.isFlat())
     {
       for (E e : this.says.consequent.vars())
-        if (! e.safeIn(this)) { return false; }
+        if (! e.safeIn(this))
+        {
+          return false;
+        }
     }
     //   b) if f is (e can-say ...) => e is safe in a.
     else
@@ -115,7 +125,10 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
     // 3. all antecedent facts are flat.
     if (this.says.hasAntecedents())
       for (Fact f : this.says.antecedents)
-        if (! f.isFlat()) { return false; }
+        if (! f.isFlat())
+        {
+          return false;
+        }
 
     return true;
   }
@@ -184,7 +197,9 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
   }
 
   public Assertion consequence()
-  { return new Assertion(this.speaker, new Claim(this.says.consequent), this.scope); }
+  {
+    return new Assertion(this.speaker, new Claim(this.says.consequent), this.scope);
+  }
 
   // TODO: refactor into constructors
   public static Assertion makeCanActAs(E speaker, E subject, Constant c)
