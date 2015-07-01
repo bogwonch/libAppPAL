@@ -32,7 +32,9 @@ public class ResultsTable
   public boolean has(Assertion q, D d)
   {
     if (q.isGround() && this.trivials.contains(q.toString()))
+    {
       return true;
+    }
 
     for (Result r : this.table)
       if (r.answers(q, d)) return true;
@@ -54,6 +56,8 @@ public class ResultsTable
    */
   public Result get(Assertion q, D d) throws IndexOutOfBoundsException
   {
+    if (this.trivials.contains(q.toString()))
+      return new Result(q, d, new Proof(true));
 
     for (Result r : this.table)
       if (r.answers(q, d)) return r;
