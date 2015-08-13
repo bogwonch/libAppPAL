@@ -45,6 +45,12 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
       f.implicitSpeaker = speaker;
   }
 
+  public boolean isCanActAs()
+  { return (says.consequent.object instanceof CanActAs); }
+
+  public boolean isCanSay()
+  { return (says.consequent.object instanceof CanSay); }
+
   public boolean isGround()
   {
     return this.vars().size() == 0;

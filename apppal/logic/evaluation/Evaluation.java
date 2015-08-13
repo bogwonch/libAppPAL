@@ -12,6 +12,7 @@ import apppal.logic.language.Fact;
 import apppal.logic.language.Predicate;
 import apppal.logic.language.VP;
 import apppal.logic.language.Variable;
+import apppal.logic.evaluation.Likely;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ public class Evaluation
   private Assertion q;
   private ResultsTable rt;
   private Set<String> derivable;
+  private Likely likely;
 
   public Evaluation(AC ac)
   {
@@ -36,13 +38,38 @@ public class Evaluation
     for (final Assertion a : this.ac.assertions)
     {
       if (a.isGround() && a.says.constraint.isTrue())
+      {
         rt.add(a);
+        if (a.says.consequent.object instanceof Predicate)
+          this.derivable.add(((Predicate) a.says.consequent.object).name);
+      }
       else if (! a.isGround() &&
                a.says.consequent.object instanceof Predicate)
       {
         this.derivable.add(((Predicate) a.says.consequent.object).name);
       }
     }
+
+    this.likely = new Likely(this.ac);
+
+    errDump();
+  }
+
+  public void errDump()
+  {
+    /* System.err.println("[#] Evaluation dump"); */
+    /* System.err.println("  AC"); */
+    /* for (Assertion a : ac.assertions) System.err.println("  A| "+a); */
+    /* System.err.println("  Constants"); */
+    /* for (E a : ac.constants) System.err.println("  C| "+a); */
+    /* System.err.println("  Subjects"); */
+    /* for (E a : ac.subjects) System.err.println("  S| "+a); */
+    /* System.err.println("  Voiced"); */
+    /* for (E a : ac.voiced) System.err.println("  V| "+a); */
+    /* System.err.println("  Interesting"); */
+    /* for (E a : ac.interesting) System.err.println("  I| "+a); */
+    /* System.err.println("  Derivable"); */
+    /* for (String s : derivable) System.err.println("  D| "+s); */
   }
 
   public static Result run(AC ac, Assertion query)
@@ -67,6 +94,7 @@ public class Evaluation
 
   private Result evaluate(Assertion q, D d)
   {
+
     if (this.rt.has(q, d))
     {
       return this.rt.get(q, d);
@@ -79,6 +107,8 @@ public class Evaluation
       return new Result(q, d, new Proof(false));
     }
 
+    /* System.out.println("[@] evaluating: "+q); */
+
     this.rt.markUnfinished(q, d);
 
     // TODO: refactor this bollox
@@ -90,6 +120,9 @@ public class Evaluation
       return result;
     }
 
+
+    /* System.out.println("[@] tried cond: "+q); */
+
     final Proof canSayOrCanActAsProof = this.canSayOrCanActAs(q, d);
     if (canSayOrCanActAsProof.isKnown())
     {
@@ -98,6 +131,7 @@ public class Evaluation
       return result;
     }
 
+    /* System.out.println("[@] all failed: "+q); */
     Result result = new Result(q, d, new Proof(false));
     this.rt.update(result);
     return result;
@@ -177,86 +211,36 @@ public class Evaluation
     return new Proof(false);
   }
 
-  /*
-     private Proof canSay(Assertion q, D d)
-     {
-  // Disallow this rule when delegation banned
-  if (d == D.ZERO) return new Proof(false);
-
-  // Disallow nested can-say statements
-  if (q.says.consequent.object instanceof CanSay) return new Proof(false);
-
-  for (final Constant c : this.ac.voiced)
-  {
-  for(final D depth : EnumSet.of(D.ZERO, D.INF))
-  {
-  final Assertion delegator =
-  Assertion.makeCanSay(q.speaker, c, depth, q.says.consequent);
-  final Result rDelegator = evaluate(delegator, d);
-  if (rDelegator.isProven())
-  {
-  final Assertion delegation = Assertion.make(c, q.says.consequent);
-  final Result rDelegation = evaluate(delegation, depth);
-  if (rDelegation.isProven())
-  return new Proof(true);
-  }
-  }
-  }
-
-  return new Proof(false);
-     }
-     */
-
-  /*
-     private Proof canActAs(Assertion q, D d)
-     {
-     for (final Constant c : this.ac.constants)
-     {
-     final Assertion renaming =
-     Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
-     final Result rRenaming = evaluate(renaming, d);
-     if (! rRenaming.isProven()) continue;
-
-     final Assertion renamed =
-     Assertion.make(q.speaker, c, q.says.consequent.object);
-     final Result rRenamed = evaluate(renamed, d);
-     if (! rRenamed.isProven()) continue;
-
-     return new Proof(true);
-     }
-
-     return new Proof(false);
-     }
-     */
-
   private Proof canSayOrCanActAs(Assertion q, D d)
   {
-    for (final Constant c : this.ac.subjects)
+    for (final Constant c : this.ac.interesting)
     {
       // Can Act As
-      /* if (this.ac.interesting.contains(c)) // True by definition of interesting surely? TODO Figure out wtf? */
-      /* { */
       if (! q.says.consequent.subject.equals(c)) // Don't care about A can-act-as A: Tautological
       {
-        /* System.err.println("[?] CanActAs: "+q+" {"); */
-        final Assertion renaming =
-          Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
-        final Result rRenaming = evaluate(renaming, d);
-        if (rRenaming.isProven())
+        if (likely.canActAs(q.says.consequent.subject, c))
         {
-          final Assertion renamed =
-            Assertion.make(q.speaker, c, q.says.consequent.object);
-          final Result rRenamed = evaluate(renamed, d);
-          if (!rRenamed.isProven())
+          /* System.err.println("[?] CanActAs:   "+q); */
+          final Assertion renaming =
+            Assertion.makeCanActAs(q.speaker, q.says.consequent.subject, c);
+          final Result rRenaming = evaluate(renaming, d);
+          if (rRenaming.isProven())
           {
-            /* System.err.println("} NO"); */
-            continue;
-          }
+            final Assertion renamed =
+              Assertion.make(q.speaker, c, q.says.consequent.object);
+            final Result rRenamed = evaluate(renamed, d);
+            if (!rRenamed.isProven())
+            {
+              /* System.err.println("} NO"); */
+              continue;
+            }
 
-          /* System.err.println("} YES"); */
-          return new Proof(true);
+            /* System.err.println("} YES"); */
+            /* System.err.println("[?] TRUE by CanActAs: "+q); */
+            return new Proof(true);
+          }
+          /* System.err.println("} NO"); */
         }
-        /* System.err.println("} NO"); */
       }
       /* } */
 
@@ -265,31 +249,39 @@ public class Evaluation
       {
         if (! q.speaker.equals(c)) // Don't care about A says A can-say...: Tautological
         {
-          /* System.err.println("[?] CanSay: "+q); */
+          /* System.err.println("[?] CanSay:     "+q); */
           // Disallow this rule when delegation banned
-          if (d == D.ZERO) return new Proof(false);
+          if (d == D.ZERO) continue;
 
-          //// Disallow can-say rule on nested can-say statements
-          if (q.says.consequent.object instanceof CanSay) return new Proof(false);
 
-          for (final D depth : EnumSet.of(D.ZERO, D.INF))
+          final boolean itsLikely = likely.canSay(q.speaker, c);
+          /* System.err.println("[>] "+q.speaker+" -> "+c+": "+itsLikely); */
+          if (itsLikely)
           {
-            final Assertion delegator =
-              Assertion.makeCanSay(q.speaker, c, depth, q.says.consequent);
-            final Result rDelegator = evaluate(delegator, d);
-            if (rDelegator.isProven())
+            // Disallow can-say rule on nested can-say statements
+            if (q.says.consequent.object instanceof CanSay) continue;
+
+            for (final D depth : EnumSet.of(D.ZERO, D.INF))
             {
-              final Assertion delegation = Assertion.make(c, q.says.consequent);
-              final Result rDelegation = evaluate(delegation, depth);
-              if (rDelegation.isProven())
+              final Assertion delegator =
+                Assertion.makeCanSay(q.speaker, c, depth, q.says.consequent);
+
+              final Result rDelegator = evaluate(delegator, d);
+              /* System.err.println("      Delegator   "+rDelegator.isProven()+": "+delegator); */
+              if (rDelegator.isProven())
               {
-                /* System.err.println("} YES"); */
-                return new Proof(true);
+                final Assertion delegation = Assertion.make(c, q.says.consequent);
+                final Result rDelegation = evaluate(delegation, depth);
+                /* System.err.println("      Delegation "+rDelegation.isProven()+": "+delegation); */
+                if (rDelegation.isProven())
+                {
+                  /* System.err.println("[?] TRUE by CanSay: "+q); */
+                  return new Proof(true);
+                }
               }
             }
           }
         }
-        /* System.err.println("} NO"); */
       }
     }
 
