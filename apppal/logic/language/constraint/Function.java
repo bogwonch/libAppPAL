@@ -108,6 +108,14 @@ public class Function extends CE implements Unifiable<CE>
         f = new BeforeHour();
         break;
 
+      case "mallodroidCheck":
+        f = new MallodroidCheck();
+        break;
+
+      case "mallodroidMaybeCheck":
+        f = new MallodroidMaybeCheck();
+        break;
+
       case "failure":
         f = new Failure();
         break;

@@ -1,11 +1,5 @@
 package apppal.logic.language.constraint.functions;
 
-/* import android.content.ContextWrapper; */
-/* import android.content.pm.ApplicationInfo; */
-/* import android.content.pm.PackageInfo; */
-/* import android.content.pm.PackageManager; */
-/* import appguarden.apppal_checker.MainActivity; */
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,14 +15,13 @@ import apppal.logic.language.constraint.CE;
 import apppal.logic.language.constraint.Fail;
 
 /**
- * Check if a permission is present using a local server.
  */
-public class HasPermission implements ConstraintFunction
+public class MallodroidMaybeCheck implements ConstraintFunction
 {
   @Override
   public int arity()
   {
-    return 2;
+    return 1;
   }
 
   @Override
@@ -38,14 +31,13 @@ public class HasPermission implements ConstraintFunction
     try
     {
       final String app = args.get(0).toString().replace("\"", "");
-      final String perm = args.get(1).toString().replace("\"", "");
 
       if (!app.startsWith("apk://"))
         return new Fail();
 
       final String name = app.substring(6);
 
-      final URL check = new URL("http://localhost:4567/permission?apk="+name+"&permission="+perm);
+      final URL check = new URL("http://localhost:4567/maybe_issues?apk="+name);
       final URLConnection conn = check.openConnection();
       in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
       final String value = in.readLine();
