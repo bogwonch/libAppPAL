@@ -112,7 +112,22 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
   {
     D d = (D) this.visit(ctx.d());
     Fact f = (Fact) this.visit(ctx.fact());
+    if (d == ZERO)
+      System.err.println("WARNING: 'can-say 0' is depreciated. Use 'can-say' instead.");
     return new CanSay(d, f);
+  }
+
+  /**
+   * Visit a parse tree produced by the {@code canSay0}
+   * labeled alternative in {@link AppPALParser#vp}.
+   *
+   * @param ctx the parse tree
+   * @return the visitor result
+   */
+  public Object visitCanSay0(AppPALParser.CanSay0Context ctx)
+  {
+    Fact f = (Fact) this.visit(ctx.fact());
+    return new CanSay(ZERO, f);
   }
 
   /**
@@ -137,6 +152,11 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
   public Object visitFact(AppPALParser.FactContext ctx)
   {
     E e = (E) this.visit(ctx.e());
+    Object o = this.visit(ctx.vp());
+    if (o instanceof Fact)
+    {
+      System.err.println("?? ("+e+") "+ ((Fact) o));
+    }
     VP vp = (VP) this.visit(ctx.vp());
     return new Fact(e, vp);
   }

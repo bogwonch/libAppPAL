@@ -12,10 +12,11 @@ d: ZERO #zero
  | INF  #inf
  ;
 
-PREDICATE_NAME: LOWER TOKENCHAR*;
-vp: PREDICATE_NAME ('(' e (',' e)* ')')? #predicate
-  | 'can-say' d fact                     #canSay
+PREDICATE_NAME: LOWER LETTERCHAR*;
+vp: 'can-say' d fact                     #canSay
+  | 'can-say' fact                       #canSay0
   | 'can-act-as' e                       #canActAs
+  | PREDICATE_NAME ('(' e (',' e)* ')')? #predicate
   ;
 
 fact: e vp;
@@ -48,3 +49,6 @@ UPPER: [A-Z];
 
 fragment
 TOKENCHAR: [a-zA-Z0-9-];
+
+fragment
+LETTERCHAR: [a-zA-Z0-9];
