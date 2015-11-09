@@ -227,4 +227,22 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
   {
     return Assertion.make(speaker, c, new CanSay(d, fact));
   }
+
+  /* Extracts all the predicates used in the assertion */
+  public Set<String> getPredicates()
+  {
+    final Set<String> predicates = new HashSet<String>();
+    String predicate = this.says.consequent.getPredicate();
+    if (predicate != null)
+      predicates.add(predicate);
+
+    for (final Fact f : this.says.antecedents)
+    {
+      predicate = f.getPredicate();
+      if (predicate != null)
+        predicates.add(f.getPredicate());
+    }
+
+    return predicates;
+  }
 }

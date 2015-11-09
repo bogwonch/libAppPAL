@@ -55,6 +55,11 @@ public class Evaluation
     errDump();
   }
 
+  public Set<String> getDerivable()
+  {
+    return this.derivable;
+  }
+
   public void errDump()
   {
     /* System.err.println("[#] Evaluation dump"); */

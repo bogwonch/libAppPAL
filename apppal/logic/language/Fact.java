@@ -112,4 +112,12 @@ public class Fact implements EntityHolding
     this.subject.scope(scope);
     this.object.scope(scope);
   }
+
+  public String getPredicate()
+  {
+    if (this.object instanceof Predicate)
+      return ((Predicate) this.object).name;
+    else
+      return null;
+  }
 }

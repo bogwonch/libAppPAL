@@ -4,6 +4,7 @@ import apppal.logic.evaluation.AC;
 import apppal.logic.evaluation.Evaluation;
 import apppal.logic.evaluation.Result;
 import apppal.logic.language.Assertion;
+import apppal.logic.language.Constant;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -24,6 +25,7 @@ public class PPC
   private final AC ac;
   private PrintStream out;
   private Boolean interactive;
+  private Boolean dump_info;
 
   public PPC(String[] args)
   {
@@ -33,6 +35,7 @@ public class PPC
     this.ac = new AC();
     this.interactive = false;
     this.out = System.out;
+    this.dump_info = false;
 
     // Command line parsing
     int i = 0;
@@ -59,6 +62,10 @@ public class PPC
 
           case "-i":
             this.interactive = true;
+            break;
+
+          case "-D":
+            this.dump_info = true;
             break;
 
           default:
@@ -101,19 +108,51 @@ public class PPC
         System.exit(4);
       }
     }
-    
+
     // Run stuff
     this.evaluation = new Evaluation(this.ac);
   }
 
   public void run()
   {
+    final Evaluation e = new Evaluation(this.ac);
+
+    if (this.dump_info)
+    {
+      System.out.println("Constants:");
+      for (Constant c : this.ac.constants)
+      {
+        final boolean voiced = this.ac.voiced.contains(c);
+        final boolean subjects = this.ac.subjects.contains(c);
+        final boolean interesting = this.ac.interesting.contains(c);
+
+        System.out.print(voiced      ? "v" : " ");
+        System.out.print(subjects    ? "s" : " ");
+        System.out.print(interesting ? "i" : " ");
+        System.out.print(" ");
+        System.out.println(c);
+      }
+
+      System.out.println("\nPredicates:");
+      final Set<String> predicates = new HashSet<String>();
+      for (final Assertion a : this.ac.assertions)
+      {
+        predicates.addAll(a.getPredicates());
+      }
+      final Set<String> derivable = e.getDerivable();
+      for (String p : predicates)
+      {
+          System.out.print(derivable.contains(p) ? "d" : " ");
+          System.out.print(" ");
+          System.out.println(p);
+      }
+    }
+
     if (this.queries.size() > 0)
     {
       System.err.println("[+] Running queries");
       for (Assertion query : this.queries)
       {
-        final Evaluation e = new Evaluation(this.ac);
         final Result result = e.run(query);
         this.out.println((result.isProven() ? "YES: " : "NO:  ")+query);
       }
@@ -127,18 +166,18 @@ public class PPC
     final Evaluation e = new Evaluation(this.ac);
     final Result result = e.run(query);
 
-    final String str = (result.isProven() ? "YES: " : "NO:  ")+query; 
+    final String str = (result.isProven() ? "YES: " : "NO:  ")+query;
     synchronized (this.out) { this.out.println(str); }
   }
 
 
-  private void repl() 
+  private void repl()
   {
     System.err.println("[+] Starting REPL");
     final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     for (;;)
-    { try 
-      { 
+    { try
+      {
         System.out.print("?- ");
 
         final String line;
@@ -147,10 +186,10 @@ public class PPC
 
         if (line.isEmpty()) continue;
         if (line == null) return;
-      
+
         final Assertion query = Assertion.parse(line);
         final Result result = this.evaluation.run(query);
-        
+
         this.out.println((result.isProven() ? "YES: " : "NO:  ")+line);
 
       }
@@ -163,7 +202,7 @@ public class PPC
     }
   }
 
-  public static void main(String[] args) throws Exception 
+  public static void main(String[] args) throws Exception
   {
     banner();
     PPC ppc = new PPC(args);
@@ -187,5 +226,6 @@ public class PPC
     System.out.println("  -o FILE    write results to this file");
     System.out.println("  -p FILE    add a policy file to the AC");
     System.out.println("  -q FILE    add a file of queries to be run");
+    System.out.println("  -D         show whats in the policy");
   }
 }
