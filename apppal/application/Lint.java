@@ -1,6 +1,7 @@
 package apppal.application;
 
 import apppal.Util;
+import apppal.lint.Completeness;
 import apppal.logic.evaluation.AC;
 import apppal.logic.language.Assertion;
 import java.io.FileInputStream;
@@ -38,7 +39,7 @@ public class Lint
 
         if (this.check_completeness)
         {
-            Util.warn("completeness checks are unimplemented");
+            final Completeness check = new Completeness(ac);
         }
         if (this.check_consistency)
         {
