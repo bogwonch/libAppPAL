@@ -17,12 +17,14 @@ PARSER_SRC=apppal/logic/grammar/AppPALBaseListener.java \
 					 apppal/logic/grammar/AppPALParser.java       \
 					 apppal/logic/grammar/AppPALVisitor.java
 MANIFEST=Manifest.txt
+LINTER_MANIFEST=Linter/Manifest.txt
 TARGET_JAR=AppPAL.jar
+LINTER_JAR=Lint.jar
 
 # WARNING: use GNU make or build each step in all in order ;-)
 all: | parser classes jar
 
-jar: $(TARGET_JAR)
+jar: $(TARGET_JAR) $(LINTER_JAR)
 
 # Compile each Java source file
 classes: $(PARSER_SRC:.java=.class) $(SRC:.java=.class) 
@@ -36,6 +38,9 @@ $(PARSER_SRC): $(GRAMMAR)
 $(TARGET_JAR): classes $(MANIFEST)
 	jar cfm $(@) $(MANIFEST) apppal lib
 
+$(LINTER_JAR): classes $(LINTER_MANIFEST)
+	jar cfm $(@) $(LINTER_MANIFEST) apppal lib
+
 clean:
-	$(RM) $(shell find -name \*.class) $(PARSER_SRC) $(TARGET_JAR)
+	$(RM) $(shell find -name \*.class) $(PARSER_SRC) $(TARGET_JAR) $(LINTER_JAR)
 
