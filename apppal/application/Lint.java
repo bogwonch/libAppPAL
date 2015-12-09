@@ -4,10 +4,13 @@ import apppal.Util;
 import apppal.lint.Completeness;
 import apppal.logic.evaluation.AC;
 import apppal.logic.language.Assertion;
+import apppal.logic.language.E;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Lint
 {
@@ -40,6 +43,19 @@ public class Lint
         if (this.check_completeness)
         {
             final Completeness check = new Completeness(ac);
+            final Map<E, Set<String>> problems = check.problems();
+
+            if (problems.isEmpty())
+                Util.info("no completeness problems");
+            else
+            {
+                System.out.println("Issues identified when checking completeness.");
+                System.out.println("The following predicates may be undecidable by their speakers:");
+
+                for (final E e : problems.keySet())
+                    for (final String pred : problems.get(e))
+                        System.out.println("  "+e+" says * "+pred);
+            }
         }
         if (this.check_consistency)
         {
