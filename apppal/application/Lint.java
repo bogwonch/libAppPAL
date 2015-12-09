@@ -51,10 +51,15 @@ public class Lint
             {
                 System.out.println("Issues identified when checking completeness.");
                 System.out.println("The following predicates may be undecidable by their speakers:");
-
                 for (final E e : problems.keySet())
                     for (final String pred : problems.get(e))
                         System.out.println("  "+e+" says * "+pred);
+                System.out.println("");
+
+                System.out.println("In particular the following assertions are undecibable.");
+                for (final Assertion a : check.undecidable())
+                    System.out.println("  "+a);
+                System.out.println("");
             }
         }
         if (this.check_consistency)

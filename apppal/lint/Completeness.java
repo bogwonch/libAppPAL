@@ -45,7 +45,7 @@ public class Completeness
 
     public boolean decidable(final Assertion a)
     {
-        return decidable(a.speaker, a.says.consequent);
+        return decidable(getSpeaker(a), a.says.consequent);
     }
 
     /**
@@ -60,6 +60,39 @@ public class Completeness
                     add(problems, speaker, predicate);
         return problems;
     }
+
+    /**
+     * Find all undecidable assertions
+     *
+     * Find all the assertions which depend on an undecidable predicate in
+     * their conditions
+     */
+    public Set<Assertion> undecidable()
+    {
+        final Set<Assertion> undecidable = new HashSet<>();
+        for (final Assertion a : ac.assertions)
+            if (specificallyUndecidable(a))
+                undecidable.add(a);
+
+        return undecidable;
+    }
+
+    /**
+     * Is this assertion undecidable
+     *
+     * Does this assertion depend on an undecidable predicate?
+     */
+    private boolean specificallyUndecidable(final Assertion a)
+    {
+        final E speaker = getSpeaker(a);
+        for (final Fact f : a.says.antecedents)
+            if (! decidable(speaker, f))
+            {
+                return true;
+            }
+        return false;
+    }
+
 
     /**
      * Fixed point algorithm for finding all decidable predicates.
@@ -80,6 +113,24 @@ a     */
         boolean iterate = true;
         Util.debug("checking completeness");
 
+        // Populate predicates
+        for (final Assertion a : ac.assertions)
+        {
+            final E speaker = getSpeaker(a);
+            // Get the predicate
+            final String pred = getPredicateName(a);
+            if (pred != null)
+                add(predicates, speaker, pred);
+
+            for (final Fact f : a.says.antecedents)
+            {
+                final String conditional_pred = getPredicateName(f);
+                if (conditional_pred != null)
+                    add(predicates, speaker, conditional_pred);
+            }
+        }
+
+        // Find fixed point
         while (iterate == true)
         {
             Util.debug("completeness fixed point iteration "+(++iteration));
@@ -87,20 +138,15 @@ a     */
             iterate = false;
             for (final Assertion a : ac.assertions)
             {
-                Util.debug("examining '"+a+"'");
                 final E speaker;
                 final String predicate;
                 final List<Fact> conditions;
 
                 // Get the speaker
-                if (a.speaker instanceof Variable)
-                    speaker = VAR;
-                else
-                    speaker = a.speaker;
+                speaker = getSpeaker(a);
 
                 // Get the predicate
-                if (a.says.consequent.object instanceof Predicate)
-                {
+                if (a.says.consequent.object instanceof Predicate) {
                     predicate = ((Predicate) a.says.consequent.object).name;
                 }
                 else
@@ -112,9 +158,8 @@ a     */
                 // Get the conditions
                 conditions = a.says.antecedents;
 
-                Util.debug("<"+speaker+", "+predicate+">");
+                Util.debug(speaker+" says * "+predicate);
 
-                add(predicates, speaker, predicate);
                 if (decidable(speaker, predicate))
                 {
                     Util.debug("known decidable");
@@ -125,10 +170,12 @@ a     */
                     boolean all_conds_decidable = true;
                     for (final Fact f : conditions)
                     {
-                        if (! decidable(speaker, f))
+                        if (f.object instanceof Predicate)
                         {
-                            all_conds_decidable = false;
-                            break;
+                            if (! decidable(speaker, f))
+                            {
+                                all_conds_decidable = false;
+                            }
                         }
                     }
 
@@ -172,5 +219,35 @@ a     */
         }
         else
             set.add(s);
+    }
+
+    /**
+     * Get the speaker of an assertion
+     */
+    private static E getSpeaker(final Assertion a)
+    {
+        if (a.speaker instanceof Variable)
+            return VAR;
+        else
+            return a.speaker;
+    }
+
+    /**
+     * Get the predicate of an assertion
+     *
+     * Returns null if we cannot name the predicate
+     */
+    private static String getPredicateName(final Assertion a)
+    {
+        return getPredicateName(a.says.consequent);
+    }
+
+    private static String getPredicateName(final Fact f)
+    {
+        if (f.object instanceof Predicate) {
+            return ((Predicate) f.object).name;
+        }
+        else
+            return null;
     }
 }
