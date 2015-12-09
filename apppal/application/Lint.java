@@ -56,10 +56,20 @@ public class Lint
                         System.out.println("  "+e+" says * "+pred);
                 System.out.println("");
 
-                System.out.println("In particular the following assertions are undecibable.");
+                System.out.println("In particular the following assertions are undecibable:");
                 for (final Assertion a : check.undecidable())
                     System.out.println("  "+a);
                 System.out.println("");
+
+                final Set<Completeness.RemotelyUnknown> currentlyUnknown = check.remotelyUnknown();
+                if (!currentlyUnknown.isEmpty())
+                {
+                    System.out.println("These decisions may be derivable through delegation but we");
+                    System.out.println("lack any statements to that effect from the delegated party:");
+                    for (final Completeness.RemotelyUnknown a : currentlyUnknown)
+                        System.out.println("  "+a);
+                    System.out.println("");
+                }
             }
         }
         if (this.check_consistency)

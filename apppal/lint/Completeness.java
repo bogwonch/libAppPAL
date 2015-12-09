@@ -3,6 +3,7 @@ package apppal.lint;
 import apppal.logic.evaluation.AC;
 import apppal.logic.language.Assertion;
 import apppal.logic.language.Constant;
+import apppal.logic.language.CanSay;
 import apppal.logic.language.E;
 import apppal.logic.language.Fact;
 import apppal.logic.language.Predicate;
@@ -78,6 +79,47 @@ public class Completeness
     }
 
     /**
+     * Find all can-say assertions where a delegation could be permitted, but
+     * which currently we don't have any information from the delegated party
+     * whether this would or would not be permitted
+     */
+    public class RemotelyUnknown
+    {
+        public final Assertion assertion;
+        public final E target;
+        public final E via;
+        public final String decision;
+
+        public RemotelyUnknown(Assertion a)
+        {
+            this.assertion = a;
+            this.target = getSpeaker(a.speaker);
+            this.via = getSpeaker(a.says.consequent.subject);
+            this.decision = getPredicateName(((CanSay) a.says.consequent.object).fact);
+        }
+
+        public String toString()
+        {
+            return "(via "+this.via+") "+target+" says * "+decision;
+        }
+    }
+
+    public Set<RemotelyUnknown> remotelyUnknown()
+    {
+        final Set<RemotelyUnknown> results = new HashSet<>();
+        for (final Assertion a : ac.assertions)
+            if (a.isCanSay() && decidable(a))
+            {
+                final CanSay cs = (CanSay) a.says.consequent.object;
+                final E delegated = a.says.consequent.subject;
+
+                if (! lookup(predicates, delegated, getPredicateName(cs.fact)))
+                    results.add(new RemotelyUnknown(a));
+            }
+        return results;
+    }
+
+    /**
      * Is this assertion undecidable
      *
      * Does this assertion depend on an undecidable predicate?
@@ -118,6 +160,14 @@ a     */
         {
             final E speaker = getSpeaker(a);
             // Get the predicate
+            if (a.isCanSay())
+            {
+                final Fact delegated = ((CanSay) a.says.consequent.object).fact;
+                final String pred = getPredicateName(delegated);
+                if (pred != null)
+                    add(predicates, speaker, pred);
+            }
+
             final String pred = getPredicateName(a);
             if (pred != null)
                 add(predicates, speaker, pred);
@@ -146,10 +196,8 @@ a     */
                 speaker = getSpeaker(a);
 
                 // Get the predicate
-                if (a.says.consequent.object instanceof Predicate) {
-                    predicate = ((Predicate) a.says.consequent.object).name;
-                }
-                else
+                predicate = getPredicateName(a);
+                if (predicate == null)
                 {
                     Util.debug("skipping");
                     continue;
@@ -160,6 +208,19 @@ a     */
 
                 Util.debug(speaker+" says * "+predicate);
 
+                // Handle can-say
+                if (a.isCanSay() && decidable(a))
+                {
+                    final E delegated = a.says.consequent.subject;
+                    final CanSay cs = ((CanSay) a.says.consequent.object);
+                    if (decidable(delegated, cs.fact))
+                    {
+                        Util.debug("consequent is decidable");
+                        add(decidable, speaker, getPredicateName(cs.fact));
+                    }
+                }
+
+                // Handle the assertion itself
                 if (decidable(speaker, predicate))
                 {
                     Util.debug("known decidable");
@@ -213,9 +274,14 @@ a     */
         final Set<String> set = table.get(e);
         if (set == null)
         {
-            final Set<String> results = new HashSet<>();
-            results.add(s);
-            table.put(e, results);
+            if (s != null)
+            {
+                final Set<String> results = new HashSet<>();
+                results.add(s);
+                table.put(e, results);
+            }
+            else
+                Util.warn("trying to add null predicate to map");
         }
         else
             set.add(s);
@@ -232,6 +298,14 @@ a     */
             return a.speaker;
     }
 
+    private static E getSpeaker(final E e)
+    {
+        if (e instanceof Variable)
+            return VAR;
+        else
+            return e;
+    }
+
     /**
      * Get the predicate of an assertion
      *
@@ -244,9 +318,11 @@ a     */
 
     private static String getPredicateName(final Fact f)
     {
-        if (f.object instanceof Predicate) {
+        if (f.object instanceof Predicate)
             return ((Predicate) f.object).name;
-        }
+        else if (f.object instanceof CanSay)
+            return "can-say * "+getPredicateName(((CanSay) f.object).fact);
+
         else
             return null;
     }
