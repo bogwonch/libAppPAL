@@ -5,6 +5,7 @@ import apppal.logic.evaluation.Evaluation;
 import apppal.logic.evaluation.Result;
 import apppal.logic.language.Assertion;
 import apppal.logic.language.Constant;
+import apppal.Util;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -69,26 +70,26 @@ public class PPC
             break;
 
           default:
-            System.err.println("unrecognised flag '"+args[i]+"'");
+            Util.error("unrecognised flag '"+args[i]+"'");
             usage();
             System.exit(1);
         }
       }
     }
     catch (Exception e)
-    { System.err.println("\nMissing argument for '"+args[i-1]+"'");
-      e.printStackTrace();
+    { Util.error("\nMissing argument for '"+args[i-1]+"'");
+      Util.debug(e.toString());
       System.exit(2);
     }
 
     // Build the assertion context
     for (String file : this.policy_files)
     {
-      System.err.println("[+] Loading policy file '"+file+"'");
+      Util.info("loading policy file '"+file+"'");
       try
       { this.ac.merge(new AC(new FileInputStream(file))); }
       catch (IOException e)
-      { System.err.println("AppPAL: error: "+e);
+      { Util.error("failed to load policy file: "+e);
         System.exit(3);
       }
     }
@@ -96,7 +97,7 @@ public class PPC
     // Build the list of queries
     for (String file : this.query_files)
     {
-      System.err.println("[+] Loading query file '"+file+"'");
+      Util.info("loading query file '"+file+"'");
       final List<Assertion> assertions;
       try
       { assertions = AC.parse(new FileInputStream(file));
@@ -104,7 +105,7 @@ public class PPC
           this.queries.add(a);
       }
       catch (IOException e)
-      { System.err.println("AppPAL: error: "+e);
+      { Util.error("failed to load query file: "+e);
         System.exit(4);
       }
     }
@@ -150,7 +151,7 @@ public class PPC
 
     if (this.queries.size() > 0)
     {
-      System.err.println("[+] Running queries");
+      Util.info("running queries");
       for (Assertion query : this.queries)
       {
         final Result result = e.run(query);
@@ -173,7 +174,7 @@ public class PPC
 
   private void repl()
   {
-    System.err.println("[+] Starting REPL");
+    Util.info("starting REPL");
     final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     for (;;)
     { try
@@ -197,7 +198,7 @@ public class PPC
       { // Handle someone hitting C-D to quit.  God knows why we need this.
         // I'm blaming Java.  It's a stupid language.
         if (e.toString() == "java.lang.NullPointerException") return;
-        else System.err.println("AppPAL: error: "+e);
+        else Util.warn("something went wrong: "+e);
       }
     }
   }
@@ -211,7 +212,6 @@ public class PPC
 
   public static void banner()
   {
-    //TODO replace with some figlet ASCII art
     System.out.println("AppPAL PPC");
     System.out.println(" - The App Policy Authorization Logic");
     System.out.println("   for PC-based Policy Checking");

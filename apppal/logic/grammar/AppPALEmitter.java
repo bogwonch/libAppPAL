@@ -21,6 +21,7 @@ import apppal.logic.language.constraint.Equals;
 import apppal.logic.language.constraint.Function;
 import apppal.logic.language.constraint.Negation;
 import apppal.logic.language.constraint.Sat;
+import apppal.Util;
 
 import static apppal.logic.language.D.INF;
 import static apppal.logic.language.D.ZERO;
@@ -80,7 +81,7 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
   public Object visitInf(AppPALParser.InfContext ctx)
   {
     return INF;
-  }
+  
 
   /**
    * Visit a parse tree produced by the {@code predicate}
@@ -112,8 +113,8 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
   {
     D d = (D) this.visit(ctx.d());
     Fact f = (Fact) this.visit(ctx.fact());
-    if (d == ZERO)
-      System.err.println("WARNING: 'can-say 0' is depreciated. Use 'can-say' instead.");
+    // if (d == ZERO)
+      // Util.warn("'can-say 0' is depreciated: use 'can-say' instead.");
     return new CanSay(d, f);
   }
 
