@@ -1,0 +1,24 @@
+'alice' says 'bob' can-say     X isCool if X isPerson.
+'alice' says 'bob' can-say inf X isCool if X isMusic.
+
+'bob' says 'david' isCool.
+'bob' says 'claire' can-say X isCool if X isMusic.
+'bob' says 'claire' can-say X isCool if X isPerson.
+
+'claire' says 'eve' isCool.
+'claire' says 'jazz' isCool.
+
+'alice' says 'bob' isPerson.
+'alice' says 'claire' isPerson.
+'alice' says 'david' isPerson.
+'alice' says 'eve' isPerson.
+'bob' says 'claire' isPerson.
+'bob' says 'david' isPerson.
+'bob' says 'eve' isPerson.
+
+
+'alice' says 'bebop' isMusic.
+'alice' says 'jazz' isMusic.
+'bob' says 'bebop' isMusic.
+'bob' says 'jazz' isMusic.
+

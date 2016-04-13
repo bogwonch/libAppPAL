@@ -1,0 +1,12 @@
+AppPAL PPC
+ - The App Policy Authorization Logic
+   for PC-based Policy Checking
+
+[0;32m[I][0;39m: loading policy file 'basic_variables.policy'
+[0;32m[I][0;39m: loading query file 'basic_variables.queries'
+[0;32m[I][0;39m: running queries
+YES: "a" says "b" isCool.
+NO:  "a" says "y" isCool.
+YES: "a" says "x" isCool.
+YES: "a" says "pot" isHot.
+NO:  "a" says "pan" isHot.

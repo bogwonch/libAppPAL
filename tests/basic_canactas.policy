@@ -1,0 +1,4 @@
+'alice' says X isDelicious if X isIcecream.
+'alice' says 'icecream' isIcecream.
+'alice' says 'hagen-daz' can-act-as 'icecream'.
+

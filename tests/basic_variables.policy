@@ -1,0 +1,12 @@
+'a' says 'b' isCool.
+
+'a' says X isCool
+  if X isNeat.
+
+'a' says 'x' isNeat.
+
+'a' says X isHot
+  if X near(Y), Y isHot.
+
+'a' says 'fire' isHot.
+'a' says 'pot' near('fire').

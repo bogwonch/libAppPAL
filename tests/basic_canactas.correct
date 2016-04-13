@@ -1,0 +1,10 @@
+AppPAL PPC
+ - The App Policy Authorization Logic
+   for PC-based Policy Checking
+
+[0;32m[I][0;39m: loading policy file 'basic_canactas.policy'
+[0;32m[I][0;39m: loading query file 'basic_canactas.queries'
+[0;32m[I][0;39m: running queries
+YES: "alice" says "icecream" isDelicious.
+NO:  "alice" says "walls" isDelicious.
+YES: "alice" says "hagen-daz" isDelicious.
