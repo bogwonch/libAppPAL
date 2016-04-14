@@ -25,12 +25,19 @@ function check_test() {
   if [ ! -r "${policy}.output" ]; then
     fail "${policy}" "could not produce correct output"
   fi
-  diff "${policy}.correct" "${policy}.output" >/dev/null 2>&1
-  if [ ${?} -ne 0 ]; then
-    fail "${policy}" "test failed"
-    diff -u "${policy}.correct" "${policy}.output"
+
+  if [ ! -r "${policy}.correct" ]; then
+    printf "⚠️  %s: no correct output: using current output\n" "${policy}"
+    cp "${policy}.output" "${policy}.correct"
+    cat "${policy}.correct"
   else
-    pass "${policy}"
+    diff "${policy}.correct" "${policy}.output" >/dev/null 2>&1
+    if [ ${?} -ne 0 ]; then
+      fail "${policy}" "test failed"
+      diff -u "${policy}.correct" "${policy}.output"
+    else
+      pass "${policy}"
+    fi
   fi
 }
 
