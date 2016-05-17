@@ -292,7 +292,7 @@ public class Evaluation
                 if (rDelegation.isProven())
                 {
                   /* System.err.println("[?] TRUE by CanSay: "+q); */
-                  return new CanSayProof(q, rDelegation.proof, rDelegation.proof);
+                  return new CanSayProof(q, rDelegator.proof, rDelegation.proof);
                 }
               }
             }

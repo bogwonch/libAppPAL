@@ -25,9 +25,7 @@ public class CanActAsProof extends Proof
         builder.append(consequent.toString());
         builder.append("\n");
         builder.append(this.renaming.showProof(indent+1));
-        builder.append("\n");
         builder.append(this.renamed.showProof(indent+1));
-        builder.append("\n");
        
         return builder.toString();
     }

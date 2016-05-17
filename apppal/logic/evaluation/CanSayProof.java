@@ -25,9 +25,7 @@ public class CanSayProof extends Proof
         builder.append(consequent.toString());
         builder.append("\n");
         builder.append(this.delegator.showProof(indent+1));
-        builder.append("\n");
         builder.append(this.delegation.showProof(indent+1));
-        builder.append("\n");
        
         return builder.toString();
     }
