@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import apppal.logic.language.Assertion;
 import apppal.logic.language.D;
+import apppal.logic.evaluation.CondProof;
 
 /**
  * Holds previously discovered results.
@@ -57,7 +58,7 @@ public class ResultsTable
   public Result get(Assertion q, D d) throws IndexOutOfBoundsException
   {
     if (this.trivials.contains(q.toString()))
-      return new Result(q, d, new Proof(true));
+      return new Result(q, d, new CondProof(q));
 
     for (Result r : this.table)
       if (r.answers(q, d)) return r;
@@ -88,7 +89,7 @@ public class ResultsTable
    */
   public void add(Assertion a)
   {
-    this.add(new Result(a, D.ZERO, new Proof(true)));
+    this.add(new Result(a, D.ZERO, new CondProof(a)));
   }
 
   /**

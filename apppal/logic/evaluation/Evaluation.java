@@ -161,7 +161,7 @@ public class Evaluation
       {
         if (subject instanceof Constant)
           if (subject.name.startsWith("apk://"))
-            return new CondProof(q, new LinkedList<Proof>());
+            return new CondProof(q);
       }
     }
 

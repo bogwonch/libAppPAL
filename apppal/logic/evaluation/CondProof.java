@@ -3,6 +3,7 @@ package apppal.logic.evaluation;
 import apppal.logic.language.Assertion;
 import apppal.logic.evaluation.Proof;
 import java.util.List;
+import java.util.LinkedList;
 import java.lang.StringBuilder;
 
 public class CondProof extends Proof
@@ -15,6 +16,13 @@ public class CondProof extends Proof
         this.proven = true;
         this.consequent = c;
         this.antecedents = as;
+    }
+
+    public CondProof(Assertion c)
+    {
+        this.proven = true;
+        this.consequent = c;
+        this.antecedents = new LinkedList<>();
     }
 
     protected String showProof(int indent)
