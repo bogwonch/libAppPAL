@@ -5,7 +5,7 @@ AppPAL PPC
 [0;32m[I][0;39m: loading policy file 'basic_cansay.policy'
 [0;32m[I][0;39m: loading query file 'basic_cansay.queries'
 [0;32m[I][0;39m: running queries
-NO:  "alice" says "bebop" isCool.
+NO:  "alice" says "eve" isCool.
 YES: "alice" says "jazz" isCool.
 YES: "alice" says "david" isCool.
-NO:  "alice" says "eve" isCool.
+NO:  "alice" says "bebop" isCool.
