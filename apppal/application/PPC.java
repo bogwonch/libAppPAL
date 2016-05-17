@@ -156,6 +156,7 @@ public class PPC
       {
         final Result result = e.run(query);
         this.out.println((result.isProven() ? "YES: " : "NO:  ")+query);
+        this.out.println(result.proof.toString());
       }
     }
 
@@ -168,7 +169,11 @@ public class PPC
     final Result result = e.run(query);
 
     final String str = (result.isProven() ? "YES: " : "NO:  ")+query;
-    synchronized (this.out) { this.out.println(str); }
+    synchronized (this.out)
+    {
+      this.out.println(str);
+      this.out.println(result.proof.toString());
+    }
   }
 
 
@@ -192,6 +197,7 @@ public class PPC
         final Result result = this.evaluation.run(query);
 
         this.out.println((result.isProven() ? "YES: " : "NO:  ")+line);
+        this.out.println(result.proof.toString());
 
       }
       catch (Exception e)

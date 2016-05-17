@@ -12,9 +12,23 @@ public class CanSayProof extends Proof
 
     public CanSayProof(Assertion consequent, Proof delegator, Proof delegation)
     {
-        super(true);
+        this.proven = true;
         this.consequent = consequent;
         this.delegator = delegator;
         this.delegation = delegation;
+    }
+    
+    protected String showProof(int indent)
+    {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(this.getIndent(indent));
+        builder.append(consequent.toString());
+        builder.append("\n");
+        builder.append(this.delegator.showProof(indent+1));
+        builder.append("\n");
+        builder.append(this.delegation.showProof(indent+1));
+        builder.append("\n");
+       
+        return builder.toString();
     }
 }

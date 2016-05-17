@@ -3,13 +3,9 @@ package apppal.logic.evaluation;
 /**
  * Created by bogwonch on 02/03/2015.
  */
-public class Proof
+public abstract class Proof
 {
-  public final boolean proven;
-  public Proof(boolean proven)
-  {
-    this.proven = proven;
-  }
+  public boolean proven;
 
   public boolean isKnown()
   {
@@ -18,5 +14,17 @@ public class Proof
   public boolean isNotKnown()
   {
     return ! this.isKnown();
+  }
+
+  public String toString()
+  {
+    return this.showProof(0);
+  }
+
+  abstract protected String showProof(int indent);
+
+  public static String getIndent(int indent)
+  {
+    return new String(new char[indent]).replace("\0", "  "); 
   }
 }

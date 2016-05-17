@@ -17,6 +17,7 @@ import apppal.logic.evaluation.Proof;
 import apppal.logic.evaluation.CondProof;
 import apppal.logic.evaluation.CanActAsProof;
 import apppal.logic.evaluation.CanSayProof;
+import apppal.logic.evaluation.FalseProof;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -115,7 +116,7 @@ public class Evaluation
     if (q.says.consequent.object instanceof Predicate &&
         ! this.derivable.contains(((Predicate) q.says.consequent.object).name))
     {
-      return new Result(q, d, new Proof(false));
+      return new Result(q, d, new FalseProof());
     }
 
     /* System.out.println("[@] evaluating: "+q); */
@@ -143,7 +144,7 @@ public class Evaluation
     }
 
     /* System.out.println("[@] all failed: "+q); */
-    Result result = new Result(q, d, new Proof(false));
+    Result result = new Result(q, d, new FalseProof());
     this.rt.update(result);
     return result;
   }
@@ -184,7 +185,7 @@ public class Evaluation
     }
 
     /* System.err.println("} NO\n"); */
-    return new Proof(false);
+    return new FalseProof();
   }
 
   private List<Proof> checkAntecedents(Assertion a, D d)
@@ -300,6 +301,6 @@ public class Evaluation
       }
     }
 
-    return new Proof(false);
+    return new FalseProof();
   }
 }
