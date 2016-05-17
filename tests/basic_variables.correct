@@ -6,7 +6,20 @@ AppPAL PPC
 [0;32m[I][0;39m: loading query file 'basic_variables.queries'
 [0;32m[I][0;39m: running queries
 YES: "a" says "b" isCool.
+"a" says "b" isCool.
+
 NO:  "a" says "y" isCool.
+<false>
+
 NO:  "a" says "pan" isHot.
+<false>
+
 YES: "a" says "x" isCool.
+"a" says "x" isCool if "x" isNeat.
+  "a" says "x" isNeat.
+
 YES: "a" says "pot" isHot.
+"a" says "pot" isHot if "pot" near(Y.27), Y.27 isHot.
+  "a" says "pot" near("fire").
+  "a" says "fire" isHot.
+

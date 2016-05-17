@@ -6,5 +6,15 @@ AppPAL PPC
 [0;32m[I][0;39m: loading query file 'basic_canactas.queries'
 [0;32m[I][0;39m: running queries
 YES: "alice" says "icecream" isDelicious.
+"alice" says "icecream" isDelicious if "icecream" isIcecream.
+  "alice" says "icecream" isIcecream.
+
 NO:  "alice" says "walls" isDelicious.
+<false>
+
 YES: "alice" says "hagen-daz" isDelicious.
+"alice" says "hagen-daz" isDelicious if "hagen-daz" isIcecream.
+  "alice" says "hagen-daz" isIcecream.
+    "alice" says "hagen-daz" can-act-as "icecream".
+    "alice" says "icecream" isIcecream.
+
