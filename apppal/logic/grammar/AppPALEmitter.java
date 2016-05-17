@@ -81,7 +81,7 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
   public Object visitInf(AppPALParser.InfContext ctx)
   {
     return INF;
-  
+  }
 
   /**
    * Visit a parse tree produced by the {@code predicate}
