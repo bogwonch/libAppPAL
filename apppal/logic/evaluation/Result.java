@@ -11,7 +11,7 @@ import apppal.logic.language.D;
 public class Result
 {
   private boolean finished;
-  private Proof proof;
+  public Proof proof;
   public final Assertion query;
   public final D d;
 

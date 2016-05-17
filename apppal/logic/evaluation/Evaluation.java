@@ -13,9 +13,15 @@ import apppal.logic.language.Predicate;
 import apppal.logic.language.VP;
 import apppal.logic.language.Variable;
 import apppal.logic.evaluation.Likely;
+import apppal.logic.evaluation.Proof;
+import apppal.logic.evaluation.CondProof;
+import apppal.logic.evaluation.CanActAsProof;
+import apppal.logic.evaluation.CanSayProof;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
 
 /**
  * Class for doing the actual evaluation
@@ -70,7 +76,7 @@ public class Evaluation
     /* System.err.println("  Subjects"); */
     /* for (E a : ac.subjects) System.err.println("  S| "+a); */
     /* System.err.println("  Voiced"); */
-    /* for (E a : ac.voiced) System.err.println("  V| "+a); */
+   /* for (E a : ac.voiced) System.err.println("  V| "+a); */
     /* System.err.println("  Interesting"); */
     /* for (E a : ac.interesting) System.err.println("  I| "+a); */
     /* System.err.println("  Derivable"); */
@@ -171,49 +177,52 @@ public class Evaluation
 
       // Condition one: all antecedents must be satisfied
       // Condition three: constraint must be sat
-      if (! this.checkAntecedents(thetaA, d).isKnown())
-        continue;
-
-      /* System.err.println("} YES"); */
-      return new Proof(true);
+      final List<Proof> antecedentProofs = this.checkAntecedents(thetaA, d);
+      if (antecedentProofs != null)
+        return new CondProof(thetaA, antecedentProofs);
     }
 
     /* System.err.println("} NO\n"); */
     return new Proof(false);
   }
 
-  private Proof checkAntecedents(Assertion a, D d)
+  private List<Proof> checkAntecedents(Assertion a, D d)
   {
     if (a.says.antecedents.size() == 0 &&
         a.says.constraint.isTriviallyTrue())
-      return new Proof(true);
+      return new LinkedList<>();
     if (a.vars().size() == 0) return this.checkAntecedentsNoVars(a, d);
     else return this.checkAntecedentWithVars(a, d);
   }
 
-  private Proof checkAntecedentsNoVars(Assertion a, D d)
+  private List<Proof> checkAntecedentsNoVars(Assertion a, D d)
   {
     if (a.vars().size() != 0) throw new RuntimeException("vars in antecedent when none claimed");
+    final List<Proof> proofs = new LinkedList<>();
     for (final Fact f : a.says.antecedents)
     {
       final Result r = evaluate(f.toAssertion(), d);
-      if (! r.isProven()) return new Proof(false);
+      if (! r.isProven()) return null;
+      proofs.add(r.proof);
     }
 
     // Check the constraint
-    return new Proof(a.says.constraint.isTrue());
+    if (! a.says.constraint.isTrue()) return null;
+
+    return proofs;
   }
 
-  private Proof checkAntecedentWithVars(Assertion a, D d)
+  private List<Proof> checkAntecedentWithVars(Assertion a, D d)
   {
     SubstituteAll subs = new SubstituteAll(a.vars(), this.ac.constants);
     for (Map<Variable, Substitution> theta : subs)
     {
       Assertion thetaA = a.substitute(theta);
-      if (this.checkAntecedentsNoVars(thetaA, d).isKnown())
-        return new Proof(true);
+      final List<Proof> proofs = checkAntecedentsNoVars(thetaA, d);
+      if (proofs != null)
+        return proofs;
     }
-    return new Proof(false);
+    return null;
   }
 
   private Proof canSayOrCanActAs(Assertion q, D d)
@@ -242,7 +251,7 @@ public class Evaluation
 
             /* System.err.println("} YES"); */
             /* System.err.println("[?] TRUE by CanActAs: "+q); */
-            return new Proof(true);
+            return new CanActAsProof(q, rRenaming.proof, rRenamed.proof);
           }
           /* System.err.println("} NO"); */
         }
@@ -281,7 +290,7 @@ public class Evaluation
                 if (rDelegation.isProven())
                 {
                   /* System.err.println("[?] TRUE by CanSay: "+q); */
-                  return new Proof(true);
+                  return new CanSayProof(q, rDelegation.proof, rDelegation.proof);
                 }
               }
             }
