@@ -15,7 +15,7 @@ public class FalseProof extends Proof
     protected String showProof(int indent)
     {
         final StringBuilder builder = new StringBuilder();
-        builder.append(this.getIndent(indent));
+        builder.append(new String(new char[indent]).replace("\0", "  "));
         builder.append("<false>");
         builder.append("\n");
         return builder.toString();

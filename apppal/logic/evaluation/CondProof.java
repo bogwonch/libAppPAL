@@ -28,7 +28,7 @@ public class CondProof extends Proof
     protected String showProof(int indent)
     {
         final StringBuilder builder = new StringBuilder();
-        builder.append(this.getIndent(indent));
+        builder.append(new String(new char[indent]).replace("\0", "  "));
         builder.append(consequent.toString());
         builder.append("\n");
         for (final Proof a : this.antecedents)

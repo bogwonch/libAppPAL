@@ -22,9 +22,4 @@ public abstract class Proof
   }
 
   abstract protected String showProof(int indent);
-
-  public static String getIndent(int indent)
-  {
-    return new String(new char[indent]).replace("\0", "  "); 
-  }
 }

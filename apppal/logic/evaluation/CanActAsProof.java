@@ -21,7 +21,7 @@ public class CanActAsProof extends Proof
     protected String showProof(int indent)
     {
         final StringBuilder builder = new StringBuilder();
-        builder.append(super.getIndent(indent));
+        builder.append(new String(new char[indent]).replace("\0", "  "));
         builder.append(consequent.toString());
         builder.append("\n");
         builder.append(this.renaming.showProof(indent+1));
