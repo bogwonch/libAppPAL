@@ -159,7 +159,8 @@ public class Evaluation
       if (((Predicate) vp).name.equals("isAnApp"))
       {
         if (subject instanceof Constant)
-          return new Proof(subject.name.startsWith("apk://"));
+          if (subject.name.startsWith("apk://"))
+            return new CondProof(q, new LinkedList<Proof>());
       }
     }
 
