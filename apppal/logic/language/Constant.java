@@ -14,7 +14,7 @@ public class Constant extends E
 
   public String toString()
   {
-    return "\"" + this.name + "\"";
+    return "\'" + this.name + "\'";
   }
 
   public static Constant parse(String str) throws IOException

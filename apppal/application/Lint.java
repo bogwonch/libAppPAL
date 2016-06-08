@@ -2,6 +2,7 @@ package apppal.application;
 
 import apppal.Util;
 import apppal.lint.Completeness;
+import apppal.lint.Redundancy;
 import apppal.logic.evaluation.AC;
 import apppal.logic.language.Assertion;
 import apppal.logic.language.E;
@@ -78,7 +79,7 @@ public class Lint
         }
         if (this.check_redundancy)
         {
-            Util.warn("redundancy checks are unimplemented");
+            final Redundancy check = new Redundancy(ac);
         }
     }
 
