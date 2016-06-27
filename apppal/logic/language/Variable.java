@@ -16,9 +16,9 @@ public class Variable extends E
   public String toString()
   {
     // For test purposes if something isn't part of an assertion don't show it.
-    if (this.scope > 0)
-      return this.name+"."+this.scope;
-    else
+    // if (this.scope > 0)
+    //   return this.name+"."+this.scope;
+    // else
       return this.name;
   }
 
