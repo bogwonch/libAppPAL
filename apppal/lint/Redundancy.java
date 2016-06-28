@@ -6,6 +6,7 @@ import apppal.logic.language.Predicate;
 import apppal.logic.language.Assertion;
 import apppal.logic.language.Variable;
 import apppal.logic.language.Claim;
+import apppal.logic.language.CanSay;
 import apppal.logic.language.Fact;
 import apppal.logic.language.Constant;
 import apppal.logic.evaluation.Unification;
@@ -30,8 +31,8 @@ public class Redundancy
 
         public Pair(final E fst, final Fact snd)
         {
-          this.speaker = fst;
-          this.predicate = snd;
+            this.speaker = fst;
+            this.predicate = snd;
         }
 
         public Assertion toAssertion()
@@ -62,7 +63,7 @@ public class Redundancy
             return this.toString().compareTo(o.toString());
         }
     }
-    
+
     private class Graph
     {
         private final Map<Pair, List<Set<Pair>>> graph;
@@ -82,38 +83,41 @@ public class Redundancy
 
         public boolean isFact(final Pair key)
         {
-            Util.debug("Checking if fact: "+key.toString());
+            // Util.debug("Checking if fact: "+key.toString());
             final List<Set<Pair>> results = graph.get(key);
+            if (! key.toAssertion().vars().isEmpty())
+            {
+                //   Util.debug("  Contains variables");
+                // Util.debug("  Not a fact");
+                return false;
+            }
             if (results != null) 
             {
                 if (results.isEmpty())
                 {
-                    Util.debug("  No rules");
-                    Util.debug("  Fact");
+                    // Util.debug("  No rules");
+                    // Util.debug("  Fact");
                     return true;
                 }
                 else
                 {
                     if (results.size() == 1 && results.get(0).isEmpty())
                     {
-                        Util.debug("    Looks like a fact");
+                        // Util.debug("    Looks like a fact");
                         return true;
                     }
-                    Util.debug("  Has "+results.size()+" rules");
-                    for (Set<Pair> ps : results)
-                        Util.debug("    "+ps.toString());
-                    Util.debug("  Not a fact");
-                    return false;
+                    else
+                    {
+                        //  Util.debug("  Has "+results.size()+" rules");
+                        for (Set<Pair> ps : results)
+                            Util.debug("    "+ps.toString());
+                        // Util.debug("  Not a fact");
+                        return false;
+                    }
                 }
             }
             else
             { 
-                if (! key.toAssertion().vars().isEmpty())
-                {
-                    Util.debug("  Contains variables");
-                    Util.debug("  Not a fact");
-                    return false;
-                }
                 Util.warn("policy is incomplete: "+key.toString());
                 return true;
             }
@@ -122,49 +126,52 @@ public class Redundancy
         /* Dump the graph out in GraphViz dot format */
         public void dump()
         {
-            System.out.println("digraph redundancy {");
             int acc = 0;
             int key_counter = 0;
+            final StringBuilder facts = new StringBuilder();
+            final StringBuilder rules = new StringBuilder();
             for (final Pair key : this.graph.keySet())
             {
-                //System.out.println("/* entry: "+ (key_counter++) +" */");
                 final List<Set<Pair>> value = this.graph.get(key);
                 for (final Set<Pair> group : value)
                 {
                     if (group.isEmpty()) 
                     {
-                        System.out.println("  \""+key.toString()+"\";");
+                        facts.append("  \""+key.toString()+"\";\n");
                     }
                     else
                     {
                         String k = "\"" +key.toString()+" ["+acc+"]\"";
-                        System.out.println("  \""+key.toString()+"\" -> "+k+";");
+                        rules.append("  \""+key.toString()+"\" -> "+k+";\n");
                         for (final Pair p : group)
-                        { System.out.println("  "+k+" -> \""+p.toString()+"\";"); }
+                        { rules.append("  "+k+" -> \""+p.toString()+"\";\n"); }
                         acc += 1;
                     }
                 }
             }
+            System.out.println("digraph redundancy {");
+            System.out.println(facts.toString());
+            System.out.println(rules.toString());
             System.out.println("}");
         }
 
         /* Get the set of keys from the graph that could be found by unifying with the search */
         public final Set<Pair> get_unifying(final Pair search)
         {
-            Util.debug("searching for unifications with "+search.toString());
+            // Util.debug("searching for unifications with "+search.toString());
             final Assertion search_ass = search.toAssertion();
             final Set<Pair> results = new HashSet<>();
             for (final Pair candidate : this.graph.keySet())
             {
-                if (candidate == search) continue;
-                Util.debug("  checking: "+candidate.toString());
+                if (candidate.toString().equals(search.toString())) continue;
+                // Util.debug("  checking: "+candidate.toString());
                 final Unification u = search_ass.unify(candidate.toAssertion());
                 if (! u.hasFailed())
                 {
-                    Util.debug("    it unifies");
+                    // Util.debug("    it unifies");
                     results.add(candidate);
                 } else {
-                    Util.debug("    it does not unify");
+                    // Util.debug("    it does not unify");
                 }
             }
             return results;
@@ -177,6 +184,7 @@ public class Redundancy
             boolean iterate = true;
             while (iterate)
             {
+                dump();
                 iteration += 1;
                 iterate = false;
                 Util.debug("");
@@ -244,10 +252,10 @@ public class Redundancy
                                             }
                                         }
                                 }
-                                
+
                                 proofs = new_proofs;
                                 iterate = true;
-                                
+
                             }
                         } 
                         fixed.addAll(proofs);
@@ -260,12 +268,12 @@ public class Redundancy
 
         private List<Set<Pair>> clean_proofs(final List<Set<Pair>> proofs)
         {
-            Util.debug("Cleaning proofs");
+            // Util.debug("Cleaning proofs");
             final List<Set<Pair>> results = new LinkedList<>();
 
             for (final Set<Pair> proof : proofs)
             {
-                Util.debug("  looking at "+proof.toString());
+                // Util.debug("  looking at "+proof.toString());
                 boolean should_add = true;
                 for (final Set<Pair> result : results)
                 {
@@ -276,20 +284,20 @@ public class Redundancy
                         for (final Pair p : proof)
                         {  
                             boolean found_it = false;
-                            Util.debug("    "+p.toString());
+                            // Util.debug("    "+p.toString());
                             for (final Pair r : result)
                             {
-                                Util.debug("      "+r.toString());
+                                // Util.debug("      "+r.toString());
                                 if (p.toString().equals(r.toString()))
                                 {
-                                    Util.debug("        yes");
+                                    // Util.debug("        yes");
                                     found_it = true;
                                     break;
                                 }
                             }
                             if (! found_it) 
                             {  
-                                Util.debug("      failed to find match");
+                                // Util.debug("      failed to find match");
                                 subset = false;
                                 break;
                             }
@@ -297,7 +305,7 @@ public class Redundancy
 
                         if (subset)
                         {
-                            Util.debug("    we already have a proof");
+                            // Util.debug("    we already have a proof");
                             should_add = false;
                             break;
                         }
@@ -305,7 +313,7 @@ public class Redundancy
                 }
                 if (should_add)
                 {
-                    Util.debug("    adding proof");
+                    // Util.debug("    adding proof");
                     results.add(proof);
                 }
             }
@@ -338,30 +346,52 @@ public class Redundancy
 
     public Redundancy(final AC ac)
     {
-      this.ac = ac;
-      this.graph = new Graph();
-      this.addFromAC();
-      graph.dump();
-      graph.fix();
-      graph.dump();
-      graph.check();
+        this.ac = ac;
+        this.graph = new Graph();
+        this.addFromAC();
+        graph.dump();
+        graph.fix();
+        graph.dump();
+        graph.check();
     }
 
     private void addFromAC()
     {
-         for (final Assertion a : this.ac.assertions)
-         {
-             final E speaker = a.speaker;
-             final Fact outcome = a.says.consequent;
+        for (final Assertion a : this.ac.assertions)
+        {
+            addAssertion(a);
+            if (a.isCanSay())
+            {
+                final E speaker = a.speaker;
+                final CanSay vp = (CanSay) a.says.consequent.object;
+                final Fact outcome = vp.fact;
+                final E delegatee = a.says.consequent.subject;
 
-             final Pair head = new Pair(speaker, outcome);
-             final Set<Pair> tail = new HashSet<>();
+                final Pair result = new Pair(speaker, outcome);
+                final Pair delegation = new Pair(delegatee, outcome);
+                final Pair can_say = new Pair(speaker, a.says.consequent);
 
-             for (final Fact f : a.says.antecedents)
-             { tail.add(new Pair(speaker, f)); }
+                final Set<Pair> tail = new HashSet<>();
+                tail.add(delegation);
+                tail.add(can_say);
 
-             this.graph.add(head, tail);
-         }
+                this.graph.add(result, tail);
+            }
+        }
+    }
+
+    private void addAssertion(final Assertion a)
+    {
+        final E speaker = a.speaker;
+        final Fact outcome = a.says.consequent;
+
+        final Pair head = new Pair(speaker, outcome);
+        final Set<Pair> tail = new HashSet<>();
+
+        for (final Fact f : a.says.antecedents)
+        { tail.add(new Pair(speaker, f)); }
+
+        this.graph.add(head, tail);
     }
 }
 
