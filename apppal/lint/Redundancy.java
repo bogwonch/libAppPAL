@@ -224,7 +224,8 @@ public class Redundancy
                     if (g1.equals(g2)) continue;
                     final Assertion a1 = g1.toAssertion();
                     final Assertion a2 = g2.toAssertion();
-                    if (! a1.isGround())
+                    //if (! a1.isGround())
+                    if (a1.vars().size() > a2.vars().size())
                     {
                         final Unification u = a1.unify(a2);
                         if (! u.hasFailed())
@@ -256,20 +257,30 @@ public class Redundancy
             // I want to do it a little slower.
             for (final Node n : to_flatten)
                 n.flatten(this);
+            this.fix_backrefs();
             return to_flatten.size();
         }
 
-        public class Node
+        public class Node implements Comparable<Node>
         {
             public final Goal owner;
             public final Set<Proof> proofs;
 
             /* A back reference to a proof in another node */
-            public class BackRef
+            public class BackRef implements Comparable<BackRef>
             {
                 public final Node node;
                 public BackRef(final Node node) { this.node = node; }
-
+                public int compareTo(final BackRef o) 
+                { return this.node.compareTo(o.node); }
+                public boolean equals(Object o)
+                {
+                    if (this == o) return true;
+                    if (this.getClass() != o.getClass()) return false;
+                    return this.node.equals(((BackRef) o).node);
+                }
+                public int hashCode()
+                { return this.node.hashCode(); }
             }
 
             public final Set<BackRef> used_by;
@@ -278,7 +289,7 @@ public class Redundancy
             {
                 this.owner = owner;
                 this.proofs = new TreeSet<>();
-                this.used_by = new HashSet<>();
+                this.used_by = new TreeSet<>();
             }
 
             public Node(final Goal owner, final Proof proof)
@@ -327,18 +338,21 @@ public class Redundancy
             public void fix_backrefs(final Graph graph)
             {
                 for (final Proof proof : proofs)
-                {
                     for (final Goal goal : this.goals())
                     {
                         final Node update = graph.graph.get(goal);
                         if (update != null)
                         {
-                            update.used_by.add(new BackRef(this));
-                        }
+                            final BackRef r = new BackRef(this);
+                            boolean should_add = true;
+                            for (final BackRef s : update.used_by)
+                                if (r.node.owner.toString().equals(s.node.owner.toString()))
+                                { should_add = false; break; }
+                            if (should_add) { update.used_by.add(r); }
+                        } 
                         else
                             Util.warn("policy may be incomplete: "+goal);
                     }
-                }
             }
 
             public boolean flatten(final Graph graph)
@@ -437,6 +451,16 @@ public class Redundancy
                 }
 
                 return out.toString();
+            }
+
+            public int compareTo(Node o)
+            {
+                if (this.owner != o.owner)
+                {
+                    return this.proofs.hashCode() - o.proofs.hashCode();
+                }
+                else
+                    return this.owner.compareTo(o.owner);
             }
         }
     }
