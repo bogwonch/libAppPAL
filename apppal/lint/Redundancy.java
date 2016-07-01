@@ -247,6 +247,7 @@ public class Redundancy
                 n.fix_backrefs(this);
         }
 
+        // Runs one iteration of the graph flattening algorithm
         public int flatten()
         {
             List<Node> to_flatten = new LinkedList<>();
@@ -259,6 +260,45 @@ public class Redundancy
                 n.flatten(this);
             this.fix_backrefs();
             return to_flatten.size();
+        }
+
+        // TODO: make this return a list of errors
+        public boolean check()
+        {
+            boolean result = true;
+            for (final Node node : this.graph.values())
+                for (final Proof a : node.proofs)
+                    for (final Proof b : node.proofs)
+                        if (a == b) continue;
+                        else if (a.compareTo(b) < 0) continue;
+                        else if (a.goals.containsAll(b.goals))
+                        {
+                            result = false;
+                            if (b.goals.containsAll(a.goals))
+                                Util.warn(node.owner+" has multiple equivalent proofs");
+                            else
+                                Util.warn(node.owner+" has redundant proofs");
+                        }
+
+            for (final Node a : this.graph.values())
+                for (final Node b : this.graph.values())
+                {
+                    if (a == b) continue;
+                    else if (a.owner.toString().compareTo(b.owner.toString()) < 0) continue;
+                    else 
+                        for (final Proof pa : a.proofs)
+                            for (final Proof pb : b.proofs)
+                                if (pa.is_stated() || pb.is_stated()) continue;
+                                else if (pa.goals.containsAll(pb.goals))
+                                {
+                                    if (pb.goals.containsAll(pa.goals))
+                                    {
+                                        result = false;
+                                        Util.warn(a.owner+" and "+b.owner+" have equivalent proofs");
+                                    }
+                                }
+                }
+            return result;
         }
 
         public class Node implements Comparable<Node>
@@ -495,6 +535,11 @@ public class Redundancy
         {
             Util.error("couldn't dump graph to file: "+err);
         }
+
+        this.check();
     }
+
+    public boolean check()
+    { return this.graph.check(); }
 }
 
