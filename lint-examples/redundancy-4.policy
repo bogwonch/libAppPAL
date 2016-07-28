@@ -1,0 +1,6 @@
+'x' says 'y' p
+  if A q.
+
+'x' says 'y' q.
+'x' says 'z' q
+  if 'p' q.

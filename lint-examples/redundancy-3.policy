@@ -1,0 +1,9 @@
+'x' says 'z' p if 'z' q.
+'x' says 'y' can-say 'z' p.
+
+'y' says 'z' p 
+  if 'z' q.
+
+'y' says 'x' can-say 'z' q.
+
+
