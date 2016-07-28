@@ -42,5 +42,5 @@ $(LINTER_JAR): classes $(LINTER_MANIFEST)
 	jar cfm $(@) $(LINTER_MANIFEST) apppal lib
 
 clean:
-	$(RM) $(shell find -name \*.class) $(PARSER_SRC) $(TARGET_JAR) $(LINTER_JAR)
+	$(RM) $(shell find . -name \*.class) $(PARSER_SRC) $(TARGET_JAR) $(LINTER_JAR)
 
