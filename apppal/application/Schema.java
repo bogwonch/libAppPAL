@@ -12,6 +12,7 @@ import apppal.logic.language.Variable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +159,6 @@ public class Schema
                 {
                     out.append(" ");
                     out.append(attributes);
-                    out.append("\n");
                 }
 
                 return out.toString();
@@ -209,9 +209,10 @@ public class Schema
 
         public String toString()
         {
-            StringBuilder out = new StringBuilder();
+            final StringBuilder out = new StringBuilder();
+            final Set<String> uniq = new HashSet<>();
 
-            out.append("digraph schema {\n");
+            out.append("digraph schema {\n  rankdir=LR\n\n");
             for (final Map.Entry<String, String>e : contexts.entrySet())
                 out.append("  "+e.getValue()+" [shape=ellipse color=red label=\""+e.getKey()+"\"]\n");
             out.append("\n");
@@ -223,7 +224,11 @@ public class Schema
             out.append("\n");
 
             for (final Path p : paths)
-                out.append("  "+p+"\n");
+                if (! uniq.contains(p.toString()))
+                {
+                    out.append("  "+p+"\n");
+                    uniq.add(p.toString());
+                }
             out.append("}");
                 
             return out.toString();
