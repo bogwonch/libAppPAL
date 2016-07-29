@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import apppal.Util;
 import apppal.logic.evaluation.Substitution;
 import apppal.logic.evaluation.Unification;
 import apppal.logic.grammar.AppPALEmitter;
@@ -41,8 +42,28 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
     this.says = says;
     this.scope = scope;
     this.scope(scope);
+    /* Expand all the typing rules into SecPAL facts */
+    for (final Variable v : this.vars())
+    {
+      final String typingObligation = v.obligeTyping();
+      if (typingObligation != null)
+      {
+        Util.debug("found obligation that: "+typingObligation);
+        try { 
+          final Fact obligation = Fact.parse(typingObligation);
+          obligation.subject.scope = v.scope;
+          this.says.antecedents.add(obligation);
+        }
+        catch (IOException err)
+        {
+          Util.error("couldn't expand typing obligation that "+typingObligation+": "+err);
+        }
+      }
+    }
+
     for (Fact f : this.says.antecedents)
       f.implicitSpeaker = speaker;
+
   }
 
   public boolean isCanActAs()

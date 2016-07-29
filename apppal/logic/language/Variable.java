@@ -7,19 +7,32 @@ import java.io.IOException;
  */
 public class Variable extends E
 {
+  public final String type;
+  public boolean typeObliged;
 
   public Variable(String name)
   {
     super(name, EKind.VARIABLE);
+    type = null;
+    typeObliged = true;
+  }
+
+  public Variable(String name, String type)
+  {
+    super(name, EKind.VARIABLE);
+    this.type = type;
+    typeObliged = false;
   }
 
   public String toString()
   {
     // For test purposes if something isn't part of an assertion don't show it.
     // if (this.scope > 0)
-    //   return this.name+"."+this.scope;
-    // else
-      return this.name;
+    final String name = this.name+"."+this.scope;
+    if (this.type == null || this.typeObliged)
+      return name;
+    else
+      return this.type+":"+name;
   }
 
   public static Variable parse(String str) throws IOException
@@ -29,6 +42,17 @@ public class Variable extends E
       return (Variable) e;
     else
       throw new IOException("parsed something else when parsing a variable");
+  }
+
+  public String obligeTyping()
+  {
+    if (! this.typeObliged && this.type != null)
+    {
+      final String type = this.type;
+      this.typeObliged = true;
+      return this.name + " is"+type;
+    }
+    else return null;
   }
 
   // Fresh variables! Get yer secret fresh variables here!

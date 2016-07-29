@@ -37,7 +37,24 @@ public class AppPALEmitter extends AppPALBaseVisitor<Object>
    */
   public Object visitVariable(AppPALParser.VariableContext ctx)
   {
-    return new Variable(ctx.VARIABLE().getText());
+    final String var = ctx.VARIABLE().getText();
+    return new Variable(var);
+  }
+
+  /**
+   * Visit a parse tree produced by the {@code typedVariable}
+   * labeled alternative in {@link apppal.logic.grammar.AppPALParser#e}.
+   *
+   * @param ctx the parse tree
+   * @return the visitor result
+   */
+  public Object visitTypedVariable(AppPALParser.TypedVariableContext ctx)
+  {
+    final String tvar = ctx.TYPEDVARIABLE().getText();
+    final String[] tokens = tvar.split(":");
+    final String type = tokens[0];
+    final String var = tokens[1];
+    return new Variable(var, type);
   }
 
   /**

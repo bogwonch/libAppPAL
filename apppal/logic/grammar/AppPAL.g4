@@ -2,8 +2,13 @@ grammar AppPAL;
 
 VARIABLE: UPPER TOKENCHAR*;
 CONSTANT: ['"] ~['"]+ ['"];
-e: VARIABLE #variable
- | CONSTANT #constant
+TYPE: UPPER TOKENCHAR*;
+TYPESEPARATOR: [:];
+TYPEDVARIABLE: TYPE TYPESEPARATOR VARIABLE;
+
+e: TYPEDVARIABLE # typedVariable
+ | VARIABLE      # variable
+ | CONSTANT      # constant
  ;
 
 ZERO: '0';
