@@ -128,5 +128,10 @@ public class Schema
             if (comparison != 0) return comparison;
             return this.decision.compareTo(other.decision);
         }
+
+        public String toGraphVizString()
+        {
+            
+        }
     }
 }
