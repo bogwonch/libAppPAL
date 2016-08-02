@@ -1,6 +1,7 @@
 package apppal.logic.language;
 
 import java.io.IOException;
+import apppal.Util;
 
 /**
  * A variable instance of an entity
@@ -28,7 +29,7 @@ public class Variable extends E
   {
     // For test purposes if something isn't part of an assertion don't show it.
     // if (this.scope > 0)
-    final String name = this.name+"."+this.scope;
+    final String name = this.name + (Util.enable_debug? "."+this.scope : "");
     if (this.type == null || this.typeObliged)
       return name;
     else
