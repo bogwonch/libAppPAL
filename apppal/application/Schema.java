@@ -10,7 +10,10 @@ import apppal.logic.language.EKind;
 import apppal.logic.language.Predicate;
 import apppal.logic.language.Variable;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,48 +21,111 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Schema 
+public class Schema
 {
     final AC ac;
     final Set<Entity> speakers;
     final Set<String> decisions;
+    final Set<String> predicates;
     final Set<Relation> relations;
 
     public static void main(final String args[])
     {
+        boolean graph = false;
+        boolean describe = false;
+        final List<String> files = new LinkedList<>();
         for (final String arg : args)
             {
-                try { 
-                    final Schema s = new Schema(arg); 
-                    s.printGraph(); 
+                switch (arg)
+                    {
+                    case "-g":
+                    case "--graph":
+                        graph = true;
+                        break;
+
+                    case "-d":
+                    case "--describe":
+                        describe = true;
+                        break;
+
+                    case "-h":
+                    case "--help":
+                        help();
+                        System.exit(0);
+                        break;
+                        
+                    default:
+                        if (arg.startsWith("-"))
+                            Util.warn("unrecognized flag: "+arg);
+                        else
+                            files.add(arg);
+                    }
+            }
+        for (final String file : files)
+            {
+                try {
+                    final Schema s = new Schema(file);
+                    if (graph == true) s.printGraph(file + ".dot");
+                    if (describe == true) s.describeGraph();
                 }
                 catch (IOException e) {return;}
             }
     }
 
-    public void printGraph()
+    public static void help()
     {
-        final SchemaGraph g = new SchemaGraph();
-        for (final Relation r : relations) g.add(r);
+        System.out.println("AppPAL Schema Analyser");
+        System.out.println("  a tool for examining AppPAL policies");
+        System.out.println("");
+        System.out.println("Usage:  java -jar Schema.jar [flags] [policies+]");
+        System.out.println("");
+        System.out.println("Flags:");
+        System.out.println("  -h --help      show this message");
+        System.out.println("  -g --graph     output a graph in GraphViz format of who does what");
+        System.out.println("  -d --describe  describe the contents of the policy");
+    }
 
-        System.out.println(g);
+    public void printGraph(final String outfile)
+    {
+        try {
+                final PrintStream out = new PrintStream(new FileOutputStream(outfile));
+                final SchemaGraph g = new SchemaGraph();
+                for (final Relation r : relations) g.add(r);
+                out.println(g);
+            }
+        catch (final FileNotFoundException err)
+            {
+                Util.error("can't write graph to file: "+err);
+            }
+    }
+
+    public void describeGraph()
+    {
+        System.out.println("Speakers:");
+        for (final Entity s: speakers)
+            System.out.println("  "+s);
+        System.out.println("");
+        System.out.println("Predicates:");
+        for (final String p: predicates)
+            System.out.println("  "+p);
     }
 
     public Schema(final String path) throws IOException
     {
         try { this.ac = new AC(new FileInputStream(path)); }
         catch (IOException err)
-        {
-            Util.error("couldn't load "+path+": "+err);
-            throw(err);
-        }
+            {
+                Util.error("couldn't load "+path+": "+err);
+                throw(err);
+            }
 
         this.speakers = new TreeSet<>();
         this.decisions = new TreeSet<>();
         this.relations = new TreeSet<>();
+        this.predicates = new TreeSet<>();
 
         for (final Assertion a : this.ac.assertions)
-        { this.add_assertion(a); }
+            { this.add_assertion(a); }
     }
 
     private void add_assertion(final Assertion a)
@@ -67,25 +133,26 @@ public class Schema
         final Entity context = new Entity(a.speaker);
         final Entity subject = new Entity(a.says.consequent.subject);
         if (a.isCanActAs())
-        {;}
+            {;}
         else if (a.isCanSay())
-        {
-            final CanSay cs = (CanSay)a.says.consequent.object;
-            if (cs.fact.object instanceof Predicate)
             {
-                final String predicate = ((Predicate)cs.fact.object).name;
-                speakers.add(context);
-                speakers.add(subject);
-                relations.add(new Relation(context, subject, predicate));
-                relations.add(new Relation(subject, subject, predicate));
+                final CanSay cs = (CanSay)a.says.consequent.object;
+                if (cs.fact.object instanceof Predicate)
+                    {
+                        final String predicate = ((Predicate)cs.fact.object).name;
+                        speakers.add(context);
+                        speakers.add(subject);
+                        predicates.add(predicate);
+                        relations.add(new Relation(context, subject, predicate));
+                        relations.add(new Relation(subject, subject, predicate));
+                    }
             }
-        }
         else
-        {
-            final String predicate = ((Predicate)a.says.consequent.object).name;
-            final Relation r = new Relation(context, context, predicate);
-            relations.add(r);
-        }
+            {
+                final String predicate = ((Predicate)a.says.consequent.object).name;
+                final Relation r = new Relation(context, context, predicate);
+                relations.add(r);
+            }
     }
 
     public class Entity
@@ -143,11 +210,11 @@ public class Schema
             public Path(final String from, final String to) { this(from, to, ""); }
             public Path(final String from, final String to, final String attributes)
             {
-                this.from = from; 
-                this.to = to; 
-                this.attributes = attributes;   
+                this.from = from;
+                this.to = to;
+                this.attributes = attributes;
             }
-            
+
             public String toString()
             {
                 final StringBuilder out = new StringBuilder();
@@ -155,11 +222,11 @@ public class Schema
                 out.append(" -> ");
                 out.append(to);
                 if (! attributes.equals(""))
-                {
-                    out.append(" ");
-                    out.append(attributes);
-                    out.append("\n");
-                }
+                    {
+                        out.append(" ");
+                        out.append(attributes);
+                        out.append("\n");
+                    }
 
                 return out.toString();
             }
@@ -177,11 +244,11 @@ public class Schema
         private String add(final String key, final Map<String, String> to)
         {
             if (! to.containsKey(key))
-            {
-                final String target = key.replaceAll("[^a-zA-Z0-9]","_") + "__" + nonce++;
-                to.put(key, target);
-                return target;
-            }
+                {
+                    final String target = key.replaceAll("[^a-zA-Z0-9]","_") + "__" + nonce++;
+                    to.put(key, target);
+                    return target;
+                }
             else return to.get(key);
         }
 
@@ -196,15 +263,15 @@ public class Schema
             final String p = add_predicate(r.decision);
 
             if (r.context == r.target)
-            { 
-                this.paths.add(new Path(c,s));
-                this.paths.add(new Path(s,p));
-            }
+                {
+                    this.paths.add(new Path(c,s));
+                    this.paths.add(new Path(s,p));
+                }
             else
-            {
-                this.paths.add(new Path(c,s,"[label=\""+r.decision+"\"]"));
-                this.paths.add(new Path(s,p));
-            }
+                {
+                    this.paths.add(new Path(c,s,"[label=\""+r.decision+"\"]"));
+                    this.paths.add(new Path(s,p));
+                }
         }
 
         public String toString()
@@ -225,7 +292,7 @@ public class Schema
             for (final Path p : paths)
                 out.append("  "+p+"\n");
             out.append("}");
-                
+
             return out.toString();
         }
     }
