@@ -6,6 +6,7 @@ import apppal.logic.language.Assertion;
 import apppal.logic.language.CanSay;
 import apppal.logic.language.Constant;
 import apppal.logic.language.E;
+import apppal.logic.language.Fact;
 import apppal.logic.language.EKind;
 import apppal.logic.language.Predicate;
 import apppal.logic.language.Variable;
@@ -66,7 +67,7 @@ public class Schema
                 try {
                     final Schema s = new Schema(file);
                     if (graph == true) s.printGraph(file + ".dot");
-                    if (describe == true) s.describeGraph();
+                    if (describe == true) s.describeGraph(file);
                 }
                 catch (IOException e) {return;}
             }
@@ -99,15 +100,17 @@ public class Schema
             }
     }
 
-    public void describeGraph()
+    public void describeGraph(final String filename)
     {
-        System.out.println("Speakers:");
+        System.out.println("* "+filename);
+        System.out.println("** Speakers:");
         for (final Entity s: speakers)
-            System.out.println("  "+s);
+            System.out.println("  - "+s);
         System.out.println("");
-        System.out.println("Predicates:");
+        System.out.println("** Predicates:");
         for (final String p: predicates)
-            System.out.println("  "+p);
+            System.out.println("  - "+p);
+        System.out.println("");
     }
 
     public Schema(final String path) throws IOException
@@ -144,13 +147,20 @@ public class Schema
                         speakers.add(subject);
                         predicates.add(predicate);
                         relations.add(new Relation(context, subject, predicate));
-                        relations.add(new Relation(subject, subject, predicate));
                     }
             }
         else
             {
                 final String predicate = ((Predicate)a.says.consequent.object).name;
                 final Relation r = new Relation(context, context, predicate);
+                predicates.add(predicate);
+                relations.add(r);
+            }
+        for (final Fact f: a.says.antecedents)
+            {
+                final String p = ((Predicate)f.object).name;
+                final Relation r = new Relation(context, context, p);
+                predicates.add(p);
                 relations.add(r);
             }
     }
@@ -278,7 +288,7 @@ public class Schema
         {
             StringBuilder out = new StringBuilder();
 
-            out.append("digraph schema {\n");
+            out.append("digraph schema {\nrankdir=LR\n\n");
             for (final Map.Entry<String, String>e : contexts.entrySet())
                 out.append("  "+e.getValue()+" [shape=ellipse color=red label=\""+e.getKey()+"\"]\n");
             out.append("\n");
@@ -289,8 +299,13 @@ public class Schema
                 out.append("  "+e.getValue()+" [shape=box color=green label=\""+e.getKey()+"\"]\n");
             out.append("\n");
 
+            final Set<String> seen = new TreeSet<>();
             for (final Path p : paths)
-                out.append("  "+p+"\n");
+                if (! seen.contains(p.toString()))
+                {
+                    seen.add(p.toString());
+                    out.append("  "+p+"\n");
+                }
             out.append("}");
 
             return out.toString();
