@@ -455,7 +455,7 @@ public class Redundancy
                 final StringBuilder out = new StringBuilder();
                 for (final Proof proof : proofs)
                 {
-                    final String pk = "\""+key+" ["+acc+"]\"";
+                    final String pk = "\"["+acc+"]\"";
                     if (proof.is_stated())
                     {
                         out.append("  ");
