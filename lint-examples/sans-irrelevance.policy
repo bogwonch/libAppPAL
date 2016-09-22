@@ -1,0 +1,5 @@
+'company' says User:U can-say U hasLost(Device:D)
+  if D isOwnedBy(U).
+
+'company' says User:U mustInform('help-desk', 'device-lost')
+  if U hasLost(D).
