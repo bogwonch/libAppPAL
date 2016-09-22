@@ -455,7 +455,10 @@ public class Redundancy
                 final StringBuilder out = new StringBuilder();
                 for (final Proof proof : proofs)
                 {
-                    final String pk = "\"["+acc+"]\"";
+                    final String label = "\"["+acc+"]\"";
+                    final String pk = "\""+key+"__"+acc+"\"";
+                    out.append("  "+pk+" [shape=plaintext label="+label+"];\n");
+              
                     if (proof.is_stated())
                     {
                         out.append("  ");
@@ -479,16 +482,18 @@ public class Redundancy
                     }
                 }
 
-                for (final BackRef ref : this.used_by)
-                {
-                    out.append("  ");
-                    out.append("\"");
-                    out.append(ref.node.owner);
-                    out.append("\"");
-                    out.append(" -> ");
-                    out.append(k);
-                    out.append("[style=dotted dir=back];\n");
-                }
+        if (Util.enable_debug == true) {
+            for (final BackRef ref : this.used_by)
+            {
+                out.append("  ");
+                out.append("\"");
+                out.append(ref.node.owner);
+                out.append("\"");
+                out.append(" -> ");
+                out.append(k);
+                out.append("[style=dotted dir=back];\n");
+            }
+        }
 
                 return out.toString();
             }
