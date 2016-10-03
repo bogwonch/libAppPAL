@@ -42,8 +42,19 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
     this.says = says;
     this.scope = scope;
     this.scope(scope);
+
+    this.expandTypes();
+
+    for (Fact f : this.says.antecedents)
+      f.implicitSpeaker = speaker;
+  }
+
+  private void expandTypes()
+  {
     /* Expand all the typing rules into SecPAL facts */
-    for (final Variable v : this.vars())
+    final Set<Variable> vs = this.vars();
+    Util.debug("found "+vs.size()+" vars");
+    for (final Variable v : vs)
     {
       final String typingObligation = v.obligeTyping();
       if (typingObligation != null)
@@ -52,19 +63,33 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
         try { 
           final Fact obligation = Fact.parse(typingObligation);
           obligation.subject.scope = v.scope;
+          for (Fact f : this.says.antecedents)
+          {
+            if (f.toString().equals(obligation.toString()))
+              throw new DuplicatedTypeException(typingObligation);
+          }
           this.says.antecedents.add(obligation);
         }
         catch (IOException err)
         {
           Util.error("couldn't expand typing obligation that "+typingObligation+": "+err);
         }
+        catch (DuplicatedTypeException err)
+        {
+          Util.warn("in assertion:");
+          Util.warn("  "+this);
+          Util.warn("the typing obligation:");
+          Util.warn("  "+typingObligation);
+          Util.warn("is already satisfied");
+          Util.warn("we're going to ignore the obligation");
+          Util.warn("remove the duplicated type declaration to get rid of this warning");
+        }
       }
     }
-
-    for (Fact f : this.says.antecedents)
-      f.implicitSpeaker = speaker;
-
   }
+  
+  public class DuplicatedTypeException extends Exception
+  { public DuplicatedTypeException(String message) { super(message); } }
 
   public boolean isCanActAs()
   { return (says.consequent.object instanceof CanActAs); }
@@ -131,6 +156,11 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
       for (E e : this.says.consequent.vars())
         if (! e.safeIn(this))
         {
+          Util.warn("the variable:");
+          Util.warn("  "+e);
+          Util.warn("in assertion:");
+          Util.warn("  "+this);
+          Util.warn("violates safety condition 1a");
           return false;
         }
     }

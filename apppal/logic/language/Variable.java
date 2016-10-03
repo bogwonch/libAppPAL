@@ -1,6 +1,7 @@
 package apppal.logic.language;
 
 import java.io.IOException;
+import apppal.Util;
 
 /**
  * A variable instance of an entity
@@ -28,11 +29,24 @@ public class Variable extends E
   {
     // For test purposes if something isn't part of an assertion don't show it.
     //final String name = this.name+"."+this.scope;
+    StringBuilder out = new StringBuilder();
     final String name = this.name;
     if (this.type == null || this.typeObliged)
-      return name;
+      out.append(name);
     else
-      return this.type+":"+name;
+    {
+      out.append(this.type);
+      out.append(":");
+      out.append(name);
+    }
+
+    if (Util.enable_debug)
+    {
+      out.append(".");
+      out.append(this.scope);
+    }
+
+    return out.toString();
   }
 
   public static Variable parse(String str) throws IOException

@@ -69,6 +69,11 @@ public class PPC
             this.dump_info = true;
             break;
 
+          case "--debug":
+            Util.enable_debug = true;
+            Util.debug("debug enabled");
+            break;
+
           default:
             Util.error("unrecognised flag '"+args[i]+"'");
             usage();
@@ -146,6 +151,17 @@ public class PPC
           System.out.print(derivable.contains(p) ? "d" : " ");
           System.out.print(" ");
           System.out.println(p);
+      }
+
+      System.out.println("\nRules:\n");
+      int n = 1;
+      for (final Assertion a : this.ac.assertions)
+      {
+        if (! a.isGround()) 
+        {
+          System.out.println(n + ".\t" + a);
+          n +=1;
+        }
       }
     }
 

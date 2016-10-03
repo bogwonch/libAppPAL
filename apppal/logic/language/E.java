@@ -62,12 +62,19 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
   public int hashCode()
   {
     int result = 17;
-    result = result * 31 + this.name.hashCode();
+    result = result * 5 + this.name.hashCode();
     result = result * 31 + this.kind.hashCode();
 
     if (this instanceof Variable)
-      result = result * 31 + new Integer(this.scope).hashCode();
-
+    {
+      final Variable it = ((Variable) this);
+      result = result * 7  + new Integer(this.scope).hashCode();
+      if (it.type != null)
+      {
+        result = result * 9  + it.type.hashCode();
+        result = result * 11 + new Boolean(it.typeObliged).hashCode();
+      }
+    }
     return result;
   }
 
@@ -83,7 +90,13 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
     if (!this.name.equals(e.name)) return false;
 
     if (this.kind == EKind.VARIABLE)
+    {
+      final Variable v_this = ((Variable) this);
+      final Variable v_e = ((Variable) e);
       if (this.scope != e.scope) return false;
+      if (v_this.type != v_e.type) return false;
+      if (v_this.typeObliged != v_e.typeObliged) return false;
+    }
     return true;
   }
 
@@ -99,7 +112,13 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
   public boolean safeIn(Assertion a)
   {
     if (this.kind == EKind.CONSTANT) return true;
-    else return (a.says.consequent.vars().contains(this) && a.says.antecedentVars().contains(this));
+    // return (a.says.consequent.vars().contains(this) && a.says.antecedentVars().contains(this));
+    for (final Variable v : a.says.consequent.vars())
+    { if (this.name.equals(v.name)) return true; }
+    for (final Variable v : a.says.antecedentVars())
+    { if (this.name.equals(v.name)) return true; }
+
+    return false;
   }
 
   /**
