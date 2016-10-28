@@ -3,6 +3,7 @@ package apppal.application;
 import apppal.Util;
 import apppal.logic.evaluation.AC;
 import apppal.schema.Graph;
+import apppal.schema.Obligations;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,11 +21,14 @@ public class Schema
         System.out.println("    -h --help   Show this message");
         System.out.println("    -D --debug  Enable debug messages");
         System.out.println("    -g --graph  Show a graph of the policy");
+        System.out.println("    -m --must   Extract a policy of obligations");
+
     }
 
     public static void main(final String args[])
     {
         boolean flag_graph = false;
+        boolean flag_must = false;
         final List<String> files = new LinkedList<>();
         for (final String arg : args)
         {
@@ -38,6 +42,10 @@ public class Schema
                     Util.debug("debugging enabled");
                     break;
 
+                case "-m": case "--must":
+                    flag_must = true;
+                    break;
+
                 case "-g": case "--graph":
                     flag_graph = true;
                     break;
@@ -48,7 +56,7 @@ public class Schema
             }
         }
 
-        if (files.isEmpty() || !(flag_graph))
+        if (files.isEmpty() || !(flag_graph||flag_must))
         {
             help();
             return;
@@ -71,6 +79,11 @@ public class Schema
                     Util.debug("plotting graph");
                     final Graph s = new Graph(ac); 
                     s.printGraph(); 
+                }
+                if (flag_must)
+                {
+                    Util.debug("extracting musts");
+                    final Obligations s = new Obligations(ac);
                 }
             }
         }

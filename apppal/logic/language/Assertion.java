@@ -53,7 +53,7 @@ public class Assertion implements EntityHolding, Unifiable<Assertion>
   {
     /* Expand all the typing rules into SecPAL facts */
     final Set<Variable> vs = this.vars();
-    Util.debug("found "+vs.size()+" vars");
+    //Util.debug("found "+vs.size()+" vars");
     for (final Variable v : vs)
     {
       final String typingObligation = v.obligeTyping();
