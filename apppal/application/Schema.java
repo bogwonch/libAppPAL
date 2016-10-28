@@ -6,6 +6,7 @@ import apppal.schema.Graph;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.io.FileInputStream;
 
 public class Schema 
 {
@@ -41,7 +42,7 @@ public class Schema
                     flag_graph = true;
                     break;
 
-            default:
+                default:
                     files.add(arg);
                     break;
             }
@@ -52,21 +53,29 @@ public class Schema
             help();
             return;
         }
-        
-        for (final String file : files)
-        {
-            Util.debug("using "+file);
-            if (flag_graph)
+
+        try { 
+            for (final String file : files)
             {
-                Util.debug("plotting graph");
-                try { 
-                    final Graph s = new Graph(file); 
+                AC ac;
+                try { ac = new AC(new FileInputStream(file)); }
+                catch (IOException err)
+                {
+                    Util.error("couldn't load "+file+": "+err);
+                    throw(err);
+                }
+
+                Util.debug("loaded "+file);
+                if (flag_graph)
+                {
+                    Util.debug("plotting graph");
+                    final Graph s = new Graph(ac); 
                     s.printGraph(); 
                 }
-                catch (IOException e) {
-                    Util.error("failed to print graph: "+e); 
-                }
             }
+        }
+        catch (IOException e) {
+            Util.error("an error occurred: "+e); 
         }
     }
 }

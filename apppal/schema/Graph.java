@@ -10,7 +10,6 @@ import apppal.logic.language.EKind;
 import apppal.logic.language.Predicate;
 import apppal.logic.language.Variable;
 import apppal.schema.Graph;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,15 +34,9 @@ public class Graph
         System.out.println(g);
     }
 
-    public Graph(final String path) throws IOException
+    public Graph(final AC ac)
     {
-        try { this.ac = new AC(new FileInputStream(path)); }
-        catch (IOException err)
-        {
-            Util.error("couldn't load "+path+": "+err);
-            throw(err);
-        }
-
+        this.ac = ac;
         this.speakers = new TreeSet<>();
         this.decisions = new TreeSet<>();
         this.relations = new TreeSet<>();
