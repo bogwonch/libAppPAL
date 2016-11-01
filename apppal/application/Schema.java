@@ -4,6 +4,7 @@ import apppal.Util;
 import apppal.logic.evaluation.AC;
 import apppal.schema.Graph;
 import apppal.schema.Obligations;
+import apppal.schema.Describe;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,10 +19,11 @@ public class Schema
         System.out.println("Usage: java -jar Schema.jar [flags] [files]");
         System.out.println("");
         System.out.println("Flags:");
-        System.out.println("    -h --help   Show this message");
-        System.out.println("    -D --debug  Enable debug messages");
-        System.out.println("    -g --graph  Show a graph of the policy");
-        System.out.println("    -m --must   Extract a policy of obligations");
+        System.out.println("    -h --help      Show this message");
+        System.out.println("    -D --debug     Enable debug messages");
+        System.out.println("    -d --describe  Show a count of what predicates are used");
+        System.out.println("    -g --graph     Show a graph of the policy");
+        System.out.println("    -m --must      Extract a policy of obligations");
 
     }
 
@@ -29,6 +31,7 @@ public class Schema
     {
         boolean flag_graph = false;
         boolean flag_must = false;
+        boolean flag_describe = false;
         final List<String> files = new LinkedList<>();
         for (final String arg : args)
         {
@@ -50,13 +53,17 @@ public class Schema
                     flag_graph = true;
                     break;
 
+                case "-d": case "--describe":
+                    flag_describe = true;
+                    break;
+
                 default:
                     files.add(arg);
                     break;
             }
         }
 
-        if (files.isEmpty() || !(flag_graph||flag_must))
+        if (files.isEmpty() || !(flag_graph||flag_must||flag_describe))
         {
             help();
             return;
@@ -84,6 +91,12 @@ public class Schema
                 {
                     Util.debug("extracting musts");
                     final Obligations s = new Obligations(ac);
+                }
+                if (flag_describe)
+                {
+                    Util.debug("describing predicates");
+                    final Describe d = new Describe(ac);
+                    System.out.println(d.toCSVString());
                 }
             }
         }
