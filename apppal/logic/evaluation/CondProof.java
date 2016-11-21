@@ -4,6 +4,8 @@ import apppal.logic.language.Assertion;
 import apppal.logic.evaluation.Proof;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.HashSet;
 import java.lang.StringBuilder;
 
 public class CondProof extends Proof
@@ -37,4 +39,10 @@ public class CondProof extends Proof
         }
         return builder.toString();
     }
+
+    protected String ruleName() { return "cond"; }
+    
+    protected Set<Proof> dependents() { return new HashSet<>(this.antecedents); }
+
+    protected Assertion goal() { return this.consequent; }
 }

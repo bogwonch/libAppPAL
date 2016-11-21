@@ -5,24 +5,24 @@ AppPAL PPC
 [0;32m[I][0;39m: loading policy file 'basic_cansay.policy'
 [0;32m[I][0;39m: loading query file 'basic_cansay.queries'
 [0;32m[I][0;39m: running queries
-NO:  "alice" says "eve" isCool.
+NO:  'alice' says 'bebop' isCool.
 <false>
 
-YES: "alice" says "jazz" isCool.
-"alice" says "jazz" isCool.
-  "alice" says "bob" can-say inf "jazz" isCool if "jazz" isMusic.
-    "alice" says "jazz" isMusic.
-  "bob" says "jazz" isCool.
-    "bob" says "claire" can-say 0 "jazz" isCool if "jazz" isMusic.
-      "bob" says "jazz" isMusic.
-    "claire" says "jazz" isCool.
+YES: 'alice' says 'david' isCool.
+'alice' says 'david' isCool.
+  'alice' says 'bob' can-say 0 'david' isCool if 'david' isPerson.
+    'alice' says 'david' isPerson.
+  'bob' says 'david' isCool.
 
-YES: "alice" says "david" isCool.
-"alice" says "david" isCool.
-  "alice" says "bob" can-say 0 "david" isCool if "david" isPerson.
-    "alice" says "david" isPerson.
-  "bob" says "david" isCool.
+YES: 'alice' says 'jazz' isCool.
+'alice' says 'jazz' isCool.
+  'alice' says 'bob' can-say inf 'jazz' isCool if 'jazz' isMusic.
+    'alice' says 'jazz' isMusic.
+  'bob' says 'jazz' isCool.
+    'bob' says 'claire' can-say 0 'jazz' isCool if 'jazz' isMusic.
+      'bob' says 'jazz' isMusic.
+    'claire' says 'jazz' isCool.
 
-NO:  "alice" says "bebop" isCool.
+NO:  'alice' says 'eve' isCool.
 <false>
 

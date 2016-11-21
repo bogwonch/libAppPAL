@@ -3,6 +3,8 @@ package apppal.logic.evaluation;
 import apppal.logic.language.Assertion;
 import apppal.logic.evaluation.Proof;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class CanSayProof extends Proof
 {
@@ -29,4 +31,16 @@ public class CanSayProof extends Proof
        
         return builder.toString();
     }
+    
+    protected String ruleName() { return "can-say"; }
+
+    protected Set<Proof> dependents()
+    {
+        final Set<Proof> result = new HashSet<>();
+        result.add(delegator);
+        result.add(delegation);
+        return result;
+    }
+
+    protected Assertion goal() { return consequent; }
 }

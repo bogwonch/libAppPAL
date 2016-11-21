@@ -2,6 +2,7 @@ package apppal.application;
 
 import apppal.logic.evaluation.AC;
 import apppal.logic.evaluation.Evaluation;
+import apppal.logic.evaluation.Proof;
 import apppal.logic.evaluation.Result;
 import apppal.logic.language.Assertion;
 import apppal.logic.language.Constant;
@@ -11,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +29,7 @@ public class PPC
   private PrintStream out;
   private Boolean interactive;
   private Boolean dump_info;
+  private Boolean graphviz_proofs;
 
   public PPC(String[] args)
   {
@@ -37,6 +40,7 @@ public class PPC
     this.interactive = false;
     this.out = System.out;
     this.dump_info = false;
+    this.graphviz_proofs = false;
 
     // Command line parsing
     int i = 0;
@@ -72,6 +76,10 @@ public class PPC
           case "--debug":
             Util.enable_debug = true;
             Util.debug("debug enabled");
+            break;
+
+          case "-g":
+            this.graphviz_proofs = true;
             break;
 
           default:
@@ -172,7 +180,20 @@ public class PPC
       {
         final Result result = e.run(query);
         this.out.println((result.isProven() ? "YES: " : "NO:  ")+query);
-        this.out.println(result.proof.toString());
+        // FIXME WHY DO I NEED THIS IN MULTIPLE PLACES
+        if (result.isProven())
+        {
+          if (this.graphviz_proofs)
+          {
+            try {
+              PrintWriter w = new PrintWriter("proof.dot", "UTF-8");
+              w.println(Proof.toGV(result.proof));
+              w.close();
+              Util.info("wrote proof to proof.dot");
+            } catch (Exception err) { Util.warn("couldn't write proof: "+err); }
+          }
+          this.out.println(result.proof.toString());
+        }
       }
     }
 
@@ -214,7 +235,16 @@ public class PPC
 
         this.out.println((result.isProven() ? "YES: " : "NO:  ")+line);
         this.out.println(result.proof.toString());
-
+        // FIXME WHY DO I NEED THIS IN MULTIPLE PLACES
+        if (this.graphviz_proofs)
+        {
+          try {
+            PrintWriter w = new PrintWriter("proof.dot", "UTF-8");
+            w.println(Proof.toGV(result.proof));
+            w.close();
+            Util.info("wrote proof to proof.dot");
+          } catch (Exception err) { Util.warn("couldn't write proof: "+err); }
+        }
       }
       catch (Exception e)
       { // Handle someone hitting C-D to quit.  God knows why we need this.
@@ -249,5 +279,6 @@ public class PPC
     System.out.println("  -p FILE    add a policy file to the AC");
     System.out.println("  -q FILE    add a file of queries to be run");
     System.out.println("  -D         show whats in the policy");
+    System.out.println("  -g         print a graphviz proof with every query");
   }
 }

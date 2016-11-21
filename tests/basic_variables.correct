@@ -5,21 +5,21 @@ AppPAL PPC
 [0;32m[I][0;39m: loading policy file 'basic_variables.policy'
 [0;32m[I][0;39m: loading query file 'basic_variables.queries'
 [0;32m[I][0;39m: running queries
-YES: "a" says "b" isCool.
-"a" says "b" isCool.
+YES: 'a' says 'pot' isHot.
+'a' says 'pot' isHot if 'pot' near(Y), Y isHot.
+  'a' says 'pot' near('fire').
+  'a' says 'fire' isHot.
 
-NO:  "a" says "y" isCool.
+NO:  'a' says 'y' isCool.
 <false>
 
-NO:  "a" says "pan" isHot.
+NO:  'a' says 'pan' isHot.
 <false>
 
-YES: "a" says "x" isCool.
-"a" says "x" isCool if "x" isNeat.
-  "a" says "x" isNeat.
+YES: 'a' says 'b' isCool.
+'a' says 'b' isCool.
 
-YES: "a" says "pot" isHot.
-"a" says "pot" isHot if "pot" near(Y.27), Y.27 isHot.
-  "a" says "pot" near("fire").
-  "a" says "fire" isHot.
+YES: 'a' says 'x' isCool.
+'a' says 'x' isCool if 'x' isNeat.
+  'a' says 'x' isNeat.
 

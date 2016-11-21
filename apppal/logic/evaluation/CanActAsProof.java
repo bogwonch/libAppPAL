@@ -3,6 +3,8 @@ package apppal.logic.evaluation;
 import apppal.logic.language.Assertion;
 import apppal.logic.evaluation.Proof;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class CanActAsProof extends Proof
 {
@@ -29,4 +31,14 @@ public class CanActAsProof extends Proof
        
         return builder.toString();
     }
+
+    protected String ruleName() { return "can-act-as"; }
+    protected Set<Proof> dependents()
+    {
+        final Set<Proof> result = new HashSet<>();
+        result.add(renaming);
+        result.add(renamed);
+        return result;
+    }
+    protected Assertion goal() { return this.consequent; }
 }

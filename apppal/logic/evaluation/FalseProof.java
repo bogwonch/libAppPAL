@@ -3,6 +3,8 @@ package apppal.logic.evaluation;
 import apppal.logic.language.Assertion;
 import apppal.logic.evaluation.Proof;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.lang.StringBuilder;
 
 public class FalseProof extends Proof
@@ -20,4 +22,15 @@ public class FalseProof extends Proof
         builder.append("\n");
         return builder.toString();
     }
+
+    protected String ruleName()
+    { return "false"; }
+    
+    protected Set<Proof> dependents()
+    { return new HashSet<>(); }
+
+    protected Assertion goal()
+    { return null; }
+    
+    
 }
