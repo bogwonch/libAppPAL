@@ -56,6 +56,7 @@ public abstract class Proof
     {
       final StringBuilder out = new StringBuilder();
       out.append("digraph proof {\n");
+      out.append("  splines=ortho;\n");
       for (final String label : assertions.keySet())
       {
         final String node = assertions.get(label);
