@@ -7,6 +7,7 @@ import java.util.Set;
 import apppal.logic.evaluation.Substitution;
 import apppal.logic.evaluation.Unification;
 import apppal.logic.interfaces.EntityHolding;
+import apppal.logic.language.D;
 
 /**
  * AppPAL can-say statement
@@ -25,7 +26,10 @@ public class CanSay extends VP implements EntityHolding
 
   public String toString()
   {
-    return "can-say " + this.d + " " + this.fact;
+    if (this.d == D.INF)
+      return "can-say " + this.d + " " + this.fact;
+    else
+      return "can-say " + this.fact;
   }
 
   public Set<Variable> vars() { return this.fact.vars(); }

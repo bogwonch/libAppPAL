@@ -59,7 +59,7 @@ public abstract class Proof
       for (final String label : assertions.keySet())
       {
         final String node = assertions.get(label);
-        out.append("  "+node+" [label=\""+label+"\"];\n");
+        out.append("  "+node+" [label=\""+label+"\", shape=underline];\n");
       }
       for (final String node : proofs)
         out.append("  "+node+" [shape=point]\n");
@@ -79,7 +79,7 @@ public abstract class Proof
       if (! children.isEmpty())
       {
         final String node = getProof();
-        this.graph.add(key+" -> "+node+" [label=\""+p.ruleName()+"\"];");
+        this.graph.add(key+" -> "+node+" [label=\""+p.ruleName()+"\", arrowhead=\"none\"];");
 
         for (final Proof child : children)
         {
@@ -105,6 +105,7 @@ public abstract class Proof
     {
       final String result = "proof_"+proof_counter;
       proof_counter += 1;
+      proofs.add(result);
       return result;
     }
   }
