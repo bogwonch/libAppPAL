@@ -24,9 +24,12 @@ LINTER_JAR=Lint.jar
 SCHEMA_JAR=Schema.jar
 
 # WARNING: use GNU make or build each step in all in order ;-)
-all: | parser classes jar
+all: | format parser classes jar
 
 jar: $(TARGET_JAR) $(LINTER_JAR) $(SCHEMA_JAR)
+
+format: $(shell find apppal -name \*.java)
+	@google-java-format -i $?
 
 # Compile each Java source file
 classes: $(PARSER_SRC:.java=.class) $(SRC:.java=.class) 
