@@ -24,7 +24,7 @@ LINTER_JAR=Lint.jar
 SCHEMA_JAR=Schema.jar
 
 # WARNING: use GNU make or build each step in all in order ;-)
-all: | format parser classes jar
+all: | parser classes jar
 
 jar: $(TARGET_JAR) $(LINTER_JAR) $(SCHEMA_JAR)
 
