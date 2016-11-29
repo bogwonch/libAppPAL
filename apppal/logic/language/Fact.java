@@ -1,35 +1,27 @@
 package apppal.logic.language;
 
-
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Set;
-
 import apppal.logic.evaluation.Substitution;
 import apppal.logic.evaluation.Unification;
 import apppal.logic.grammar.AppPALEmitter;
 import apppal.logic.grammar.AppPALLexer;
 import apppal.logic.grammar.AppPALParser;
 import apppal.logic.interfaces.EntityHolding;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Set;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-/**
- * AppPAL fact
- * E VP
- */
-public class Fact implements EntityHolding
-{
+/** AppPAL fact E VP */
+public class Fact implements EntityHolding {
   public final E subject;
   public final VP object;
   public E implicitSpeaker;
 
-  public Fact(E subject, VP object)
-  {
+  public Fact(E subject, VP object) {
     this.subject = subject;
     this.object = object;
 
@@ -37,43 +29,39 @@ public class Fact implements EntityHolding
     this.implicitSpeaker = null;
   }
 
-  public Assertion toAssertion()
-  {
+  public Assertion toAssertion() {
     if (this.implicitSpeaker == null)
-      throw new RuntimeException("cannot convert fact to assertion without knowing implicit speaker");
+      throw new RuntimeException(
+          "cannot convert fact to assertion without knowing implicit speaker");
     return new Assertion(this.implicitSpeaker, new Claim(this));
   }
 
-  public String toString()
-  {
+  public String toString() {
     return this.subject + " " + this.object;
   }
 
   /**
    * Is the fact flat (i.e. not of the can-say form)
+   *
    * @returns boolean
    */
-  public boolean isFlat()
-  {
-    return ! (this.object instanceof CanSay);
+  public boolean isFlat() {
+    return !(this.object instanceof CanSay);
   }
 
-  public Set<Variable> vars()
-  {
+  public Set<Variable> vars() {
     Set<Variable> vars = this.subject.vars();
     vars.addAll(this.object.vars());
     return vars;
   }
 
-  public Set<Constant> consts()
-  {
+  public Set<Constant> consts() {
     Set<Constant> consts = this.subject.consts();
     consts.addAll(this.object.consts());
     return consts;
   }
 
-  public Unification unify(Fact fact)
-  {
+  public Unification unify(Fact fact) {
     Unification tau = this.subject.unify(fact.subject);
     if (tau.hasFailed()) return tau;
 
@@ -84,19 +72,19 @@ public class Fact implements EntityHolding
     return tau;
   }
 
-  public Fact substitute(Map<Variable, Substitution> delta)
-  {
+  public Fact substitute(Map<Variable, Substitution> delta) {
     E subject = this.subject.substitute(delta);
     VP object = this.object.substitute(delta);
     return new Fact(subject, object);
   }
 
-  /** Create a fact by parsing a string
+  /**
+   * Create a fact by parsing a string
+   *
    * @param str the fact to parse
    * @returns the parsed fact
    */
-  public static Fact parse(String str) throws IOException
-  {
+  public static Fact parse(String str) throws IOException {
     InputStream in = new ByteArrayInputStream(str.getBytes("UTF-8"));
     ANTLRInputStream input = new ANTLRInputStream(in);
     AppPALLexer lexer = new AppPALLexer(input);
@@ -107,17 +95,13 @@ public class Fact implements EntityHolding
     return (Fact) emitter.visit(tree);
   }
 
-  public void scope(int scope)
-  {
+  public void scope(int scope) {
     this.subject.scope(scope);
     this.object.scope(scope);
   }
 
-  public String getPredicate()
-  {
-    if (this.object instanceof Predicate)
-      return ((Predicate) this.object).name;
-    else
-      return null;
+  public String getPredicate() {
+    if (this.object instanceof Predicate) return ((Predicate) this.object).name;
+    else return null;
   }
 }

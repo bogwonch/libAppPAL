@@ -1,22 +1,19 @@
 package apppal.logic.language.constraint.functions;
 
-import java.util.List;
-
 import apppal.logic.interfaces.ConstraintFunction;
 import apppal.logic.language.constraint.CE;
 import apppal.logic.language.constraint.Fail;
+import java.util.List;
 
-/**
- * Constraint function that always fails.
- */
-public class Failure implements ConstraintFunction
-{
+/** Constraint function that always fails. */
+public class Failure implements ConstraintFunction {
   @Override
-  public int arity()
-  { return 0; }
+  public int arity() {
+    return 0;
+  }
 
   @Override
-  public CE eval(List<CE> args)
-  { return new Fail(); }
-
+  public CE eval(List<CE> args) {
+    return new Fail();
+  }
 }

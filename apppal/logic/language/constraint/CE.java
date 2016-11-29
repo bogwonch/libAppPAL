@@ -1,18 +1,17 @@
 package apppal.logic.language.constraint;
 
-import java.util.Set;
-
+import apppal.logic.interfaces.EntityHolding;
 import apppal.logic.interfaces.Unifiable;
 import apppal.logic.language.Variable;
-import apppal.logic.interfaces.EntityHolding;
+import java.util.Set;
 
-/**
- * Constraint Entity.
- */
-abstract public class CE implements EntityHolding, Unifiable<CE>
-{
+/** Constraint Entity. */
+public abstract class CE implements EntityHolding, Unifiable<CE> {
   public abstract String toString();
+
   public abstract Set<Variable> vars();
+
   public void scope(int scope) {}
+
   public abstract CE eval();
 }

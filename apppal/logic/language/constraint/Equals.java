@@ -1,54 +1,48 @@
 package apppal.logic.language.constraint;
 
-import java.util.Map;
-import java.util.Set;
-
 import apppal.logic.evaluation.Substitution;
 import apppal.logic.evaluation.Unification;
 import apppal.logic.interfaces.Unifiable;
 import apppal.logic.language.Constant;
 import apppal.logic.language.Variable;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Equality in constraints.
- */
-public class Equals extends Constraint implements Unifiable<Constraint>
-{
+/** Equality in constraints. */
+public class Equals extends Constraint implements Unifiable<Constraint> {
   public final CE lhs;
   public final CE rhs;
 
-  public Equals(CE lhs, CE rhs)
-  {
+  public Equals(CE lhs, CE rhs) {
     super();
     this.lhs = lhs;
     this.rhs = rhs;
   }
 
-  public String toString() { return this.lhs+" = "+this.rhs; }
+  public String toString() {
+    return this.lhs + " = " + this.rhs;
+  }
 
   @Override
-  public boolean hasFailed()
-  {
+  public boolean hasFailed() {
     return (this.lhs instanceof Fail) || (this.rhs instanceof Fail);
   }
 
-  public Set<Variable> vars()
-  {
+  public Set<Variable> vars() {
     Set<Variable> vars = this.lhs.vars();
     vars.addAll(this.rhs.vars());
     return vars;
   }
-  public Set<Constant> consts()
-  {
+
+  public Set<Constant> consts() {
     Set<Constant> consts = this.lhs.consts();
     consts.addAll(this.rhs.consts());
     return consts;
   }
 
   @Override
-  public Unification unify(Constraint with)
-  {
-    if (! (with instanceof Equals)) return new Unification(false);
+  public Unification unify(Constraint with) {
+    if (!(with instanceof Equals)) return new Unification(false);
     final Equals that = (Equals) with;
     final Unification unification = this.lhs.unify(that.lhs);
     if (unification.hasFailed()) return unification;
@@ -59,19 +53,18 @@ public class Equals extends Constraint implements Unifiable<Constraint>
   }
 
   @Override
-  public Constraint substitute(Map<Variable, Substitution> delta)
-  { return new Equals(this.lhs.substitute(delta), this.rhs.substitute(delta)); }
+  public Constraint substitute(Map<Variable, Substitution> delta) {
+    return new Equals(this.lhs.substitute(delta), this.rhs.substitute(delta));
+  }
 
   @Override
-  public boolean isTrue()
-  {
+  public boolean isTrue() {
     if (this.hasFailed()) return false;
     return lhs.eval().equals(rhs.eval());
   }
 
   @Override
-  public void scope(int scope)
-  {
+  public void scope(int scope) {
     this.lhs.scope(scope);
     this.rhs.scope(scope);
   }

@@ -1,39 +1,32 @@
 package apppal.logic.evaluation;
 
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.List;
-import java.util.LinkedList;
 import apppal.logic.language.Assertion;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
-/**
- * Abstract representation of tree proof
- */
-public abstract class Proof
-{
+/** Abstract representation of tree proof */
+public abstract class Proof {
   public boolean proven;
 
-  public boolean isKnown()
-  {
+  public boolean isKnown() {
     return this.proven;
   }
-  public boolean isNotKnown()
-  {
-    return ! this.isKnown();
+
+  public boolean isNotKnown() {
+    return !this.isKnown();
   }
 
-  public String toString()
-  {
+  public String toString() {
     return this.showProof(0);
   }
 
-  public static String toGV(final Proof p)
-  { return (new GraphViz(p)).toString(); }
+  public static String toGV(final Proof p) {
+    return (new GraphViz(p)).toString();
+  }
 
-  public static class GraphViz
-  {
+  public static class GraphViz {
     private Integer proof_counter;
     private Integer node_counter;
 
@@ -41,8 +34,7 @@ public abstract class Proof
     final Map<String, String> assertions;
     final Set<String> proofs;
 
-    public GraphViz(final Proof p)
-    {
+    public GraphViz(final Proof p) {
       this.node_counter = 0;
       this.proof_counter = 0;
       this.graph = new TreeSet<>();
@@ -52,67 +44,61 @@ public abstract class Proof
       this.add(p);
     }
 
-    public String toString()
-    {
+    public String toString() {
       final StringBuilder out = new StringBuilder();
       out.append("digraph proof {\n");
       out.append("  splines=ortho;\n");
-      for (final String label : assertions.keySet())
-      {
+      for (final String label : assertions.keySet()) {
         final String node = assertions.get(label);
-        out.append("  "+node+" [label=\""+label+"\", shape=underline];\n");
+        out.append("  " + node + " [label=\"" + label + "\", shape=underline];\n");
       }
-      for (final String node : proofs)
-        out.append("  "+node+" [shape=point]\n");
-      for (final String g : graph)
-        out.append("  "+g+"\n");
+      for (final String node : proofs) out.append("  " + node + " [shape=point]\n");
+      for (final String g : graph) out.append("  " + g + "\n");
 
       out.append("}");
       return out.toString();
     }
 
-    public void add(final Proof p)
-    {
+    public void add(final Proof p) {
       final Assertion goal = p.goal();
       final String key = getAssertion(goal);
       final Set<Proof> children = p.dependents();
 
-      if (! children.isEmpty())
-      {
+      if (!children.isEmpty()) {
         final String node = getProof();
-        this.graph.add(key+" -> "+node+" [label=\""+p.ruleName()+"\", arrowhead=\"none\"];");
+        this.graph.add(
+            key + " -> " + node + " [label=\"" + p.ruleName() + "\", arrowhead=\"none\"];");
 
-        for (final Proof child : children)
-        {
+        for (final Proof child : children) {
           final String c = getAssertion(child.goal());
-          this.graph.add(node+" -> "+c+";");
+          this.graph.add(node + " -> " + c + ";");
           this.add(child);
         }
       }
     }
 
-    public String getAssertion(final Assertion a)
-    {
+    public String getAssertion(final Assertion a) {
       final String key = a.toString();
-      if (assertions.containsKey(key))
-        return assertions.get(key);
-      final String value = "node_"+node_counter;
+      if (assertions.containsKey(key)) return assertions.get(key);
+      final String value = "node_" + node_counter;
       node_counter += 1;
       assertions.put(key, value);
       return value;
     }
 
-    public String getProof()
-    {
-      final String result = "proof_"+proof_counter;
+    public String getProof() {
+      final String result = "proof_" + proof_counter;
       proof_counter += 1;
       proofs.add(result);
       return result;
     }
   }
 
-  abstract protected String showProof(int indent);
-  abstract protected String ruleName();
-  abstract protected Set<Proof> dependents();
-  abstract protected Assertion goal();
+  protected abstract String showProof(int indent);
+
+  protected abstract String ruleName();
+
+  protected abstract Set<Proof> dependents();
+
+  protected abstract Assertion goal();
 }

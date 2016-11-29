@@ -1,9 +1,10 @@
 package apppal.logic.evaluation;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-
+import apppal.logic.grammar.AppPALEmitter;
+import apppal.logic.grammar.AppPALLexer;
+import apppal.logic.grammar.AppPALParser;
+import apppal.logic.language.Assertion;
+import apppal.logic.language.Constant;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,20 +12,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import apppal.logic.grammar.AppPALEmitter;
-import apppal.logic.grammar.AppPALLexer;
-import apppal.logic.grammar.AppPALParser;
-import apppal.logic.language.Assertion;
-import apppal.logic.language.Constant;
-import apppal.logic.language.E;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 /**
- * An assertion context is the result of loading a policy file into AppPAL.
- * It contains all manner of information about how AppPAL statements should be evaluated.
+ * An assertion context is the result of loading a policy file into AppPAL. It contains all manner
+ * of information about how AppPAL statements should be evaluated.
  */
-public class AC
-{
+public class AC {
   public final List<Assertion> assertions;
   public final Set<Constant> constants;
 
@@ -35,22 +31,17 @@ public class AC
 
   /**
    * Check all assertions in the context meet the safety property.
+   *
    * @throws IllegalArgumentException
    */
-  private void checkAssertionSafety() throws IllegalArgumentException
-  {
+  private void checkAssertionSafety() throws IllegalArgumentException {
     for (Assertion a : this.assertions)
-      if (! a.isSafe())
-        throw new IllegalArgumentException("unsafe assertion: "+a);
+      if (!a.isSafe()) throw new IllegalArgumentException("unsafe assertion: " + a);
   }
 
-  /**
-   * Populate the list of constants from the assertions.
-   */
-  private void populateConstants()
-  {
-    for (Assertion a : this.assertions)
-    {
+  /** Populate the list of constants from the assertions. */
+  private void populateConstants() {
+    for (Assertion a : this.assertions) {
       this.voiced.addAll(a.getVoiced());
       this.subjects.addAll(a.getSubjects());
       this.constants.addAll(a.consts());
@@ -65,12 +56,12 @@ public class AC
 
   /**
    * Parse an Assertion context out of an input stream
+   *
    * @param in input stream to parse
    * @return the list of assertions
    * @throws IOException
    */
-  public static List<Assertion> parse(InputStream in) throws IOException
-  {
+  public static List<Assertion> parse(InputStream in) throws IOException {
     ANTLRInputStream input = new ANTLRInputStream(in);
     AppPALLexer lexer = new AppPALLexer(input);
     CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -81,13 +72,15 @@ public class AC
     return (List<Assertion>) emitter.visit(tree);
   }
 
-  public AC(String str) throws IOException
-  { this(new ByteArrayInputStream(str.getBytes("UTF-8"))); }
+  public AC(String str) throws IOException {
+    this(new ByteArrayInputStream(str.getBytes("UTF-8")));
+  }
 
-  public AC(InputStream in) throws IOException { this(AC.parse(in)); }
+  public AC(InputStream in) throws IOException {
+    this(AC.parse(in));
+  }
 
-  public AC(List<Assertion> as)
-  {
+  public AC(List<Assertion> as) {
     this.assertions = as;
     this.constants = new HashSet<>();
     this.voiced = new HashSet<>();
@@ -98,8 +91,7 @@ public class AC
     this.populateConstants();
   }
 
-  public AC()
-  {
+  public AC() {
     this.assertions = new LinkedList<>();
     this.constants = new HashSet<>();
     this.voiced = new HashSet<>();
@@ -109,10 +101,10 @@ public class AC
 
   /**
    * Merge two assertion contexts into one mega-assertion context.
+   *
    * @param other the context to merge
    */
-  public void merge(AC other)
-  {
+  public void merge(AC other) {
     this.assertions.addAll(other.assertions);
     this.populateConstants();
   }

@@ -1,36 +1,30 @@
 package apppal.logic.language;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-
+import apppal.logic.evaluation.Substitution;
+import apppal.logic.evaluation.Unification;
+import apppal.logic.grammar.AppPALEmitter;
+import apppal.logic.grammar.AppPALLexer;
+import apppal.logic.grammar.AppPALParser;
+import apppal.logic.interfaces.EntityHolding;
+import apppal.logic.interfaces.Unifiable;
+import apppal.logic.language.constraint.CE;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-import apppal.logic.evaluation.Substitution;
-import apppal.logic.evaluation.Unification;
-import apppal.logic.grammar.AppPALEmitter;
-import apppal.logic.grammar.AppPALLexer;
-import apppal.logic.grammar.AppPALParser;
-import apppal.logic.interfaces.Unifiable;
-import apppal.logic.language.constraint.CE;
-import apppal.logic.interfaces.EntityHolding;
-
-/**
- * AppPAL entity
- */
-public abstract class E extends CE implements EntityHolding, Unifiable<CE>
-{
+/** AppPAL entity */
+public abstract class E extends CE implements EntityHolding, Unifiable<CE> {
   public final String name;
   public final EKind kind;
   protected int scope; // Unscoped
 
-  public E(String name, EKind kind)
-  {
+  public E(String name, EKind kind) {
     this.name = name;
     this.kind = kind;
     this.scope = 0; // No scope by default
@@ -38,19 +32,15 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
 
   public abstract String toString();
 
-  public Set<Variable> vars()
-  {
+  public Set<Variable> vars() {
     Set<Variable> ans = new HashSet<>();
-    if (this.kind == EKind.VARIABLE)
-      ans.add((Variable) this);
+    if (this.kind == EKind.VARIABLE) ans.add((Variable) this);
     return ans;
   }
 
-  public Set<Constant> consts()
-  {
+  public Set<Constant> consts() {
     Set<Constant> ans = new HashSet<>();
-    if (this.kind == EKind.CONSTANT)
-      ans.add((Constant) this);
+    if (this.kind == EKind.CONSTANT) ans.add((Constant) this);
     return ans;
   }
 
@@ -59,19 +49,16 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
    * Oh for C... Oh for Haskell...
    */
   @Override
-  public int hashCode()
-  {
+  public int hashCode() {
     int result = 17;
     result = result * 5 + this.name.hashCode();
     result = result * 31 + this.kind.hashCode();
 
-    if (this instanceof Variable)
-    {
+    if (this instanceof Variable) {
       final Variable it = ((Variable) this);
-      result = result * 7  + new Integer(this.scope).hashCode();
-      if (it.type != null)
-      {
-        result = result * 9  + it.type.hashCode();
+      result = result * 7 + new Integer(this.scope).hashCode();
+      if (it.type != null) {
+        result = result * 9 + it.type.hashCode();
         result = result * 11 + new Boolean(it.typeObliged).hashCode();
       }
     }
@@ -79,18 +66,15 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
   }
 
   @Override
-  public boolean equals(Object other)
-  {
-    if (!(other instanceof E))
-    {
+  public boolean equals(Object other) {
+    if (!(other instanceof E)) {
       return false;
     }
     E e = (E) other;
     if (this.kind != e.kind) return false;
     if (!this.name.equals(e.name)) return false;
 
-    if (this.kind == EKind.VARIABLE)
-    {
+    if (this.kind == EKind.VARIABLE) {
       final Variable v_this = ((Variable) this);
       final Variable v_e = ((Variable) e);
       if (this.scope != e.scope) return false;
@@ -103,20 +87,19 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
   /**
    * @param a assertion to check safety in
    * @brief Check whether an entity is safe in an assertion
-   *
-   * A variable v is safe in an Assertion of the form:
-   * A says f if f_1, ..., f_n where c
-   * if v is in f and v is in f_1,...f_n.
+   *     <p>A variable v is safe in an Assertion of the form: A says f if f_1, ..., f_n where c if v
+   *     is in f and v is in f_1,...f_n.
    * @returns boolean
    */
-  public boolean safeIn(Assertion a)
-  {
+  public boolean safeIn(Assertion a) {
     if (this.kind == EKind.CONSTANT) return true;
     // return (a.says.consequent.vars().contains(this) && a.says.antecedentVars().contains(this));
-    for (final Variable v : a.says.consequent.vars())
-    { if (this.name.equals(v.name)) return true; }
-    for (final Variable v : a.says.antecedentVars())
-    { if (this.name.equals(v.name)) return true; }
+    for (final Variable v : a.says.consequent.vars()) {
+      if (this.name.equals(v.name)) return true;
+    }
+    for (final Variable v : a.says.antecedentVars()) {
+      if (this.name.equals(v.name)) return true;
+    }
 
     return false;
   }
@@ -127,8 +110,7 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
    * @param str the Constant to parse
    * @returns the parsed Constant
    */
-  public static E parse(String str) throws IOException
-  {
+  public static E parse(String str) throws IOException {
     InputStream in = new ByteArrayInputStream(str.getBytes("UTF-8"));
     ANTLRInputStream input = new ANTLRInputStream(in);
     AppPALLexer lexer = new AppPALLexer(input);
@@ -139,52 +121,39 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
     return (E) emitter.visit(tree);
   }
 
-  public Unification unify(E other)
-  {
+  public Unification unify(E other) {
     Unification unification = new Unification();
-    if (this.kind == EKind.CONSTANT && other.kind == EKind.CONSTANT)
-    {
-      if (!this.name.equals(other.name))
-        unification.fails();
-    }
-    else
-    {
+    if (this.kind == EKind.CONSTANT && other.kind == EKind.CONSTANT) {
+      if (!this.name.equals(other.name)) unification.fails();
+    } else {
       Variable x;
       E t;
-      if (this.kind == EKind.VARIABLE)
-      {
+      if (this.kind == EKind.VARIABLE) {
         x = (Variable) this;
         t = other;
-      }
-      else
-      {
+      } else {
         x = (Variable) other;
         t = this;
       }
 
       if (!x.equals(t))
-        try
-        {
+        try {
           unification.add(x, t);
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
           unification.fails();
         }
     }
     return unification;
   }
 
-  public Unification unify(CE other)
-  {
+  public Unification unify(CE other) {
     if (other instanceof E) return this.unify((E) other);
     else return new Unification(false);
   }
 
-  public E substitute(Map<Variable, Substitution> delta)
-  {
+  public E substitute(Map<Variable, Substitution> delta) {
     if (this.kind == EKind.CONSTANT) return this;
-    if (delta.containsKey(this))
-    {
+    if (delta.containsKey(this)) {
       Substitution theta = delta.get(this);
       return theta.to;
     }
@@ -192,8 +161,12 @@ public abstract class E extends CE implements EntityHolding, Unifiable<CE>
   }
 
   @Override
-  public void scope(int scope) { this.scope = scope; }
+  public void scope(int scope) {
+    this.scope = scope;
+  }
 
   @Override
-  public CE eval() { return this; }
+  public CE eval() {
+    return this;
+  }
 }

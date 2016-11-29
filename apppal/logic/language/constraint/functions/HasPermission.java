@@ -6,34 +6,20 @@ package apppal.logic.language.constraint.functions;
 /* import android.content.pm.PackageManager; */
 /* import appguarden.apppal_checker.MainActivity; */
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
-
-import apppal.logic.evaluation.Proof;
 import apppal.logic.interfaces.ConstraintFunction;
-import apppal.logic.language.constraint.Bool;
 import apppal.logic.language.constraint.CE;
 import apppal.logic.language.constraint.Fail;
+import java.util.List;
 
-/**
- * Check if a permission is present using a local server.
- */
-public class HasPermission implements ConstraintFunction
-{
+/** Check if a permission is present using a local server. */
+public class HasPermission implements ConstraintFunction {
   @Override
-  public int arity()
-  {
+  public int arity() {
     return 2;
   }
 
   @Override
-  public CE eval(List<CE> args)
-  {
+  public CE eval(List<CE> args) {
     return new Fail();
     /* BufferedReader in = null; */
     /* try */
